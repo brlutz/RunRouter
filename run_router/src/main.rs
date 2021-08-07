@@ -53,8 +53,8 @@ fn main() -> Result<(), csv::Error> {
     for record in &vec {
         println!(
             "Edges: {},{}: Weight: {}.",
-            record.edge1,
-            record.edge2,
+            record.edge1.trim().to_string(),
+            record.edge2.trim().to_string(),
             record.weight,
         );
     }
@@ -66,45 +66,145 @@ fn main() -> Result<(), csv::Error> {
             println!("Key: {}, Destination: {}, Weight: {}", key, edge.destination, edge.weight)
         }
     }
-    eulerize(&g);
+    
+
+        eulerize(&g);
+
+
+    
 
     Ok(())
 }
 
-fn eulerize(graph: &HashMap<String, Node>) -> () {
-    for (key, node) in graph.iter()
-    {
-        if (node.edges.len() % 2 == 1 )
-        {
-            let mut edge_to_connect : String;
-            for edge in node.edges.iter() {
-                // take the first node that has an odd degree and connect it, this almost certainly be optimized for weight
-                if(graph[edge.destination].edges.len() % 2 == 1) 
-                {
-                    edge_to_connect = edge.destination.clone();
-                }
 
-                println!("Key: {}, Destination: {}, Weight: {}", key, edge.destination, edge.weight)
-            }
-        }
 
-    }
+fn connect_nodes_via_map(node_map: Vec<String>, graph: &HashMap<String, Node>) -> Option<&HashMap<String, Node>> {
+
+    return None
+
 }
 
-fn find_nearest_node_with_odd_degree(node: Node, graph: &HashMap<String, Node>) -> Vec<String> {
-    let mut edge_to_connect : String;
+fn connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Node>) -> HashMap<String, Node> {
+    let mut graph = g;
+    if graph.contains_key(&start) {
+        // println!("Found Key: {}", &start);
+        let e = Edge {
+            source: start.clone(),
+            destination: end.clone(),
+            weight: weight,
+        };
+        graph.get_mut(&start).unwrap().edges.push(e);
+    } 
+    else 
+    {
+        // println!("No Key: {}", &start);
+        let e = Edge {
+            source: start.clone(),
+            destination: end.clone(),
+            weight: weight.clone(),
+        };
+        let mut n = Node {
+            name: start.clone(),
+            edges: Vec::new(),
+        };
+        n.edges.push(e);
+        graph.insert(start.clone(), n);
+    }
+
+    return graph
+}
+
+fn eulerize(graph: &HashMap<String, Node>) -> Option<&HashMap<String, Node>> {
+    if !is_eulerized(&graph) {
+        println!("Graph is not eulerized");
+        for (key, node) in graph.iter()
+        {                
+            // find a node that's odd
+            if node.edges.len() % 2 == 1 
+            {
+                let mut success: bool = false;
+                let mut node_map: Vec<String> = Vec::new();
+                let mut traversed: Vec<String> = Vec::new();
+
+                // find the nearest odd node
+                match find_path_to_node_with_odd_degree(node.name.clone(), graph, &mut traversed ) {
+                    Some(mut x) => 
+                    {
+                        success = true;
+                        node_map.append(&mut x);
+                        break;
+                    }
+                    None => { println!("Hit a dead end")}
+                }
+
+                // connect the two nodes
+
+
+                /*
+                let mut edge_to_connect : String;
+                for edge in node.edges.iter() {
+                    // take the first node that has an odd degree and connect it, this almost certainly be optimized for weight
+                    if graph[&edge.destination].edges.len() % 2 == 1
+                    {
+                        edge_to_connect = edge.destination.clone();
+                    }
+    
+                    println!("Key: {}, Destination: {}, Weight: {}", key, edge.destination, edge.weight)
+                }
+                */
+            }
+    
+        }
+    }
+
+    println!("Graph is eulerized");
+
+
+    return None
+    //return graph
+}
+
+fn is_eulerized(graph: &HashMap<String, Node>) -> bool {
+   let mut count = 0;
+    for (key, node) in graph.iter()
+    {
+        if node.edges.len() % 2 == 1 
+        {
+            count = count+1;
+        }
+    }
+
+    // traversable only if 2 or 0 because math
+    if count == 2 || count == 0  {return true}
+    return false
+}
+
+fn find_path_to_node_with_odd_degree(node_name: String, graph: &HashMap<String, Node>, traversed: &mut Vec<String>) -> Option<Vec<String>> {
+    let mut edge_to_connect : String = "".to_string();
     let mut node_map: Vec<String> = Vec::new();
-    for edge in node.edges.iter() {
+    let mut success: bool = false;
+
+    // We've already been here, abort
+    if traversed.contains(&node_name) {
+       return None
+    }
+
+    // breadth first search of the current node
+    for edge in graph[&node_name].edges.iter() {
         // take the first node that has an odd degree and connect it, this almost certainly be optimized for weight
-        if(graph[edge.destination].edges.len() % 2 == 1) 
+        if graph[&edge.source].edges.len() % 2 == 1
         {
             edge_to_connect = edge.destination.clone();
+            break;
         }
 
-        println!("Key: {}, Destination: {}, Weight: {}", key, edge.destination, edge.weight)
+        // println!("Key: {}, Destination: {}, Weight: {}", key, edge.destination, edge.weight)
     }
-    if(edge_to_connect.is_empty())
+
+    // start breadth first searches of adjacent nodes
+    if edge_to_connect.is_empty()
     {
+
         // breadth or depth first search can be used here, maybe both for most accurate results?
         // Gonna try breadth first search first
 
@@ -115,45 +215,42 @@ fn find_nearest_node_with_odd_degree(node: Node, graph: &HashMap<String, Node>) 
         frontier.retain(|&x| x != node.name);
         */
 
+        traversed.push(node_name.clone());
+
         // get all the edges we need to traverse to
+        for edge in graph[&node_name].edges.iter() {
 
-        // check to see if those edges are degree even
+            match find_path_to_node_with_odd_degree(edge.source.clone(), graph, traversed) {
+                Some(mut x) => 
+                {
+                    success = true;
+                    node_map.append(&mut x);
+                    break;
+                }
+                None => { println!("Hit a dead end")}
+            }
+        }
 
-        // if they are, call this again, but with new nodes every time
+        if success {
+            return Some(node_map)
+        }
 
-        // if they are not, return 
+        return None
 
     }
+
+   return Some(node_map)
 
 }
 
 fn map_data(data: &Vec<Record>) -> HashMap<String, Node> {
+    
     let mut g: HashMap<String, Node> = HashMap::new();
     for record in data {
-        if g.contains_key(&record.edge1) {
-            println!("Found Key: {}", &record.edge1);
-            let e = Edge {
-                source: record.edge1.clone(),
-                destination: record.edge2.clone(),
-                weight: record.weight.clone(),
-            };
-            g.get_mut(&record.edge1).unwrap().edges.push(e);
-        } 
-        else 
-        {
-            println!("No Key: {}", &record.edge1);
-            let e = Edge {
-                source: record.edge1.clone(),
-                destination: record.edge2.clone(),
-                weight: record.weight.clone(),
-            };
-            let mut n = Node {
-                name: record.edge1.clone(),
-                edges: Vec::new(),
-            };
-            n.edges.push(e);
-            g.insert(record.edge1.clone(), n);
-        }
+
+        // undirectional, so you have to do both.
+        g = connect_nodes(record.edge1.trim().to_string(), record.edge2.trim().to_string(), record.weight, g);
+        g = connect_nodes(record.edge2.trim().to_string(), record.edge1.trim().to_string(), record.weight, g);
     }
-    g
+   return g
 }
