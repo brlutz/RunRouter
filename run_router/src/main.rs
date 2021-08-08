@@ -4,11 +4,12 @@ use std::error::Error;
 
 #[derive(Deserialize)]
 struct Record {
-    edge1: String,
-    edge2: String,
+    node1: String,
+    node2: String,
     weight: u16,
-    traversed: bool,
 }
+
+
 
 struct Graph {
     nodes: Vec<Node>
@@ -20,9 +21,10 @@ struct Node {
 }
 
 struct Edge {
-    source: String,
-    destination: String,
+    node1: String,
+    node2: String,
     weight: u16,
+    traversed: bool
 }
 
 struct MapResult {
@@ -32,7 +34,7 @@ struct MapResult {
 
 fn get_data() -> Result<Vec<Record>, csv::Error> {
 
-    let csv = "edge1,edge2,weight
+    let csv = "node1,node2,weight
     1,2,1
     1,3,1
     1,4,1
@@ -58,24 +60,37 @@ fn main() -> Result<(), csv::Error> {
 
     for record in &vec {
         println!(
-            "Edges: {},{}: Weight: {}.",
-            record.edge1.trim().to_string(),
-            record.edge2.trim().to_string(),
+            "Nodes: {},{}: Weight: {}.",
+            record.node1,
+            record.node2,
             record.weight,
         );
     }
+    
     let g = map_data(&vec);
-
+    /*
     for (key, node) in g.iter()
     {
         for edge in node.edges.iter() {
             println!("Key: {}, Destination: {}, Weight: {}", key, edge.destination, edge.weight)
         }
-    }
+    }*/
     
 
-    find_route(&g);
-
+    //find_route(&g);
+    match is_eulerized(&g) {
+        Some(x) => 
+        {
+            println!("Is Not eulerized");
+            for node in x.iter()
+            {
+              println!("Odd degree nodes: {}", node);
+            }
+         
+             println!("Graph has {} odd degrees", x.len());
+        }
+        None => { println!("Is eulerized");}
+    };
 
     
 
@@ -87,7 +102,7 @@ fn connect_nodes_via_map(node_map: Vec<String>, graph: &HashMap<String, Node>) -
     return None
 
 }
-
+/*
 fn connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Node>) -> HashMap<String, Node> {
     let mut graph = g;
     if graph.contains_key(&start) {
@@ -118,7 +133,7 @@ fn connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Nod
     return graph
 }
 
-fn eulerize(graph: &HashMap<String, Node>) -> Option<&HashMap<String, Node>> {
+fn eulerize(graph: &Vec<Record>) -> Option<&HashMap<String, Node>> {
     if !is_eulerized(&graph) {
         println!("Graph is not eulerized");
         for (key, node) in graph.iter()
@@ -167,30 +182,48 @@ fn eulerize(graph: &HashMap<String, Node>) -> Option<&HashMap<String, Node>> {
     return None
     //return graph
 }
+*/
+fn is_eulerized(graph: &Vec<Edge>) -> Option<Vec<String>> {
 
-fn is_eulerized(graph: &HashMap<String, Node>) -> bool {
-   let mut count = 0;
-    for (key, node) in graph.iter()
-    {
-        if node.edges.len() % 2 == 1 
-        {
-            count = count+1;
-        }
-/*
-        for edge in node.edges.iter() {
-            if node.edges.len() % 2 == 1 && graph[&edge.destination].edges.iter().any(|&x| x.destination =="edge.source")
-            {
+   let mut nodes: Vec<String> = Vec::new();
+   let mut odd_nodes: Vec<String> = Vec::new();
+   let mut odd_count: u16 = 0;
+   for record in graph.iter() 
+   {
+     if !nodes.contains(&record.node1)
+     {
+         nodes.push(record.node1.clone())
+     }
+
+     if !nodes.contains(&record.node2)
+     {
+         nodes.push(record.node2.clone())
+     }
+   }
+
+   for node in nodes.iter()
+   {
+        let mut count = 0;
+
+        for record in graph.iter() {
+            if &record.node1 == node || &record.node2 == node {
                 count = count+1;
             }
         }
-        */
-    }
-    println!("Graph has {} odd degrees", count);
+
+        if count % 2 == 1 {
+            odd_count = odd_count + 1;
+            odd_nodes.push(node.clone());
+        }
+   } 
+
     // traversable only if 2 or 0 because math
-    if count == 2 || count == 0  {return true}
-    return false
+    if odd_count == 0  {    return None}
+
+    return Some(odd_nodes)
 }
 
+/*
 fn find_path_to_node_with_odd_degree(node_name: String, graph: &HashMap<String, Node>, traversed: &mut Vec<String>) -> Option<Vec<String>> {
     let mut edge_to_connect : String = "".to_string();
     let mut node_map: Vec<String> = Vec::new();
@@ -254,19 +287,32 @@ fn find_path_to_node_with_odd_degree(node_name: String, graph: &HashMap<String, 
    return Some(node_map)
 
 }
+*/
 
-fun find_route(graph: &HashMap<String, Node>) -> Option(MapResult) -> {
-
+fn find_route(graph: &HashMap<String, Node>) -> Option<MapResult> {
+    None
 }
 
-fn map_data(data: &Vec<Record>) -> HashMap<String, Node> {
+fn map_data(data: &Vec<Record>) -> Vec<Edge> {
     
-    let mut g: HashMap<String, Node> = HashMap::new();
+    let mut g: Vec<Edge> = Vec::new();
     for record in data {
+        let e: Edge = Edge {
+            node1: record.node1.trim().to_string(),
+            node2: record.node2.trim().to_string(),
+            weight: record.weight,
+            traversed: false
+        };
 
-        // undirectional, so you have to do both.
-        g = connect_nodes(record.edge1.trim().to_string(), record.edge2.trim().to_string(), record.weight, g);
-        g = connect_nodes(record.edge2.trim().to_string(), record.edge1.trim().to_string(), record.weight, g);
+        println!(
+            "Nodes: {},{}, Weight: {}, Traversed: {} ",
+            e.node1,
+            e.node2,
+            e.weight,
+            e.traversed
+        );
+        g.push(e);
+
     }
    return g
 }
