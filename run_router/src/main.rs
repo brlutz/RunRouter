@@ -18,7 +18,6 @@ struct Graph {
 struct Node {
     name: String,
     edges: Vec<Edge>,
-    traversed: bool
 }
 
 struct Edge {
@@ -98,10 +97,21 @@ fn main() -> Result<(), csv::Error> {
     Ok(())
 }
 
+pub fn copy_vec<T: Clone>(vec: &Vec<T>) -> Vec<T> {
+    let mut vec = vec.clone();
+    vec
+}
+
 struct DjikstraNode {
+
     total_distance: u16,
     path: Vec<String>,
     traversed: bool
+}
+
+struct DjikstraNodes {
+    start_node: String,
+    nodes: HashMap<String,Vec<DjikstraNode>>,
 }
 
 
@@ -124,8 +134,39 @@ fn find_shortest_path(start: &String, graph: HashMap<String, Node>) -> HashMap<S
         paths.insert(key.clone(), dn);
     }
 
-    return paths;
+    let mut adj_edges: &Vec<Edge> = &Vec::new();
 
+    let current_node_name = start;
+
+    match graph.get(current_node_name) {
+        Some(x) => adj_edges = &x.edges,
+        _ => panic!("There are no adjacent edges something is messed up"),
+    }
+    let mut previous = paths.remove(current_node_name).unwrap();
+
+    for edge in adj_edges {
+        let mut e: DjikstraNode = paths.remove(&edge.node2).unwrap();
+        
+        if edge.weight < e.total_distance {
+            e.total_distance = edge.weight;
+            if e.path.len() == 0 {
+                e.path.push(current_node_name.clone());
+                e.path.push(edge.node2.clone());
+            }
+            else
+            {
+                e.path = paths.get_mut(current_node_name).unwrap().path.clone();
+                e.path.push(edge.node2.clone());
+
+            }
+        }
+        paths.insert(edge.node2.to_string(), e);
+    }
+
+    previous.traversed = true;
+    paths.insert(current_node_name.to_string(), previous);
+
+    return paths;
     // for nodes, mark node dist(0), rest dist(infinity)
     // for node update edges with total_distance from node if distance less than existing distance
         // update nodes edges with map from node -> neighbors
@@ -134,9 +175,11 @@ fn find_shortest_path(start: &String, graph: HashMap<String, Node>) -> HashMap<S
 
     // when all nodes are complete, map total distance and path to djikstra node
     // return string, distance, map
-
 }
 
+fn process_node(node_name: &String, graph: &HashMap<String, Node>) -> () {
+
+}
 
 fn connect_nodes_via_map(node_map: Vec<String>, graph: &HashMap<String, Node>) -> Option<&HashMap<String, Node>> {
 
@@ -368,6 +411,27 @@ fn map_nodes(data: &Vec<Record>) -> HashMap<String, Node> {
    return g
 }
 
+/*
+struct DjikstraNodes {
+    start_node: String,
+    nodes: HashMap<String,Vec<DjikstraNode>>,
+}
+*/
+fn map_to_djikstra_nodes(data: &Vec<Record>) -> DjikstraNodes {
+    
+    let mut g : DjikstraNodes {
+        start_node: "".to_string(),
+        nodes: HashMap::new();
+    }
+    for record in data {
+
+        // undirectional, so you have to do both.
+        g = connect_nodes(record.node1.trim().to_string(), record.node2.trim().to_string(), record.weight, g);
+        g = connect_nodes(record.node2.trim().to_string(), record.node1.trim().to_string(), record.weight, g);
+    }
+   return g
+}
+
 fn connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Node>) -> HashMap<String, Node> {
     let mut graph = g;
     if graph.contains_key(&start) {
@@ -390,7 +454,38 @@ fn connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Nod
         let mut n = Node {
             name: start.clone(),
             edges: Vec::new(),
-            traversed: false,
+
+        };
+        n.edges.push(e);
+        graph.insert(start.clone(), n);
+    }
+
+    return graph
+}
+
+fn connect_djikstra_nodes(start: String, end: String, weight: u16, g: HashMap<String, Node>) -> DjikstraNodes {
+    let mut graph = g;
+    if graph.contains_key(&start) {
+        // println!("Found Key: {}", &start);
+        let e = Edge {
+            node1: start.clone(),
+            node2: end.clone(),
+            weight: weight,
+        };
+        graph.get_mut(&start).unwrap().edges.push(e);
+    } 
+    else 
+    {
+        // println!("No Key: {}", &start);
+        let e = Edge {
+            node1: start.clone(),
+            node2: end.clone(),
+            weight: weight.clone(),
+        };
+        let mut n = Node {
+            name: start.clone(),
+            edges: Vec::new(),
+
         };
         n.edges.push(e);
         graph.insert(start.clone(), n);
