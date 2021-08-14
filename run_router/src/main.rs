@@ -80,6 +80,7 @@ fn main() -> Result<(), csv::Error> {
         }
     }
 
+    let mut odd_nodes: Vec<String> = Vec::new();
     //find_route(&g);
     match is_eulerized(&edges) {
         Some(x) => 
@@ -89,11 +90,31 @@ fn main() -> Result<(), csv::Error> {
             {
               println!("Odd degree nodes: {}", node);
             }
+            odd_nodes = x;
          
-             println!("Graph has {} odd degrees", x.len());
-        }
+             // println!("Graph has {} odd degrees", x.len());
+        } 
         None => { println!("Is eulerized");}
     };
+
+    let mut maps_for_odd_nodes: HashMap<String, DjikstraNodes> = HashMap::new();
+
+    for odd_node in odd_nodes {
+        maps_for_odd_nodes.insert(odd_node.clone(), find_shortest_path(&odd_node, &d));
+        break;
+    }
+
+    for (key, dn) in maps_for_odd_nodes.iter()
+    {
+        for (k, dnode ) in dn.nodes.iter()
+        {
+            for n in dnode.adj_nodes.iter() {
+                let path: String = dnode.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(",");
+                println!("Start Node: {}, Destination: {}, Path: {}, Path Weight: {}", key, n.name, path, n.weight)
+            }
+
+        }
+    }
 
     Ok(())
 }
@@ -119,7 +140,7 @@ struct NodeWeightMap {
 }
 
 
-fn find_shortest_path(start: &String, g: DjikstraNodes) -> DjikstraNodes {
+fn find_shortest_path(start: &String, g: &DjikstraNodes) -> DjikstraNodes {
     // Done in earlier function: for nodes, mark node dist(0), rest dist(infinity)
 
     let mut graph: DjikstraNodes = DjikstraNodes {
@@ -132,8 +153,6 @@ fn find_shortest_path(start: &String, g: DjikstraNodes) -> DjikstraNodes {
         node_being_looked_at.total_distance = 0;
         node_being_looked_at.path.push(start.clone());
     }
-
-    
 
     let current_node_name = start;
 
@@ -177,7 +196,7 @@ fn find_shortest_path(start: &String, g: DjikstraNodes) -> DjikstraNodes {
 
     // recurse
     if !name_of_closest_node.is_empty() {
-        graph = find_shortest_path(&name_of_closest_node.clone(), graph);
+        graph = find_shortest_path(&name_of_closest_node.clone(), &graph);
     }
 
     return graph
