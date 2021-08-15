@@ -96,8 +96,8 @@ fn main() -> Result<(), csv::Error> {
         }
     }
 
+    // get odd nodes
     let mut odd_nodes: Vec<String> = Vec::new();
-    //find_route(&g);
     match is_eulerized(&edges) {
         Some(x) => 
         {
@@ -113,9 +113,9 @@ fn main() -> Result<(), csv::Error> {
         None => { println!("Is eulerized");}
     };
 
+    // find maps for all the odd nodse
     let mut maps_for_odd_nodes: HashMap<String, DjikstraNodes> = HashMap::new();
-
-    for odd_node in odd_nodes {
+    for odd_node in odd_nodes.iter() {
         let mut graph: DjikstraNodes = DjikstraNodes {
             start_node: odd_node.clone(),
             nodes: d.nodes.clone(),
@@ -136,7 +136,72 @@ fn main() -> Result<(), csv::Error> {
         }
     }
 
+    let pairs: Vec<Pair> = get_pair_combinations(&odd_nodes);
+
+    println!("These are the pairs");
+    for pair in pairs.iter() {
+        println!("{},{}", pair.node1, pair.node2);
+    }
+
+    // get combinations of all the odd nodes 
+    
+
+    // remove duplicate combinations
+
+    // find edges with smallest total distance
+
+    // connect edges
+
+    // find eulerian path. 
+
     Ok(())
+}
+
+fn get_pair_combinations(n: &Vec<String>) -> Vec<Pair> {
+    
+    if n.len() % 2 != 0 { panic!("There should never be an odd number of pair options");}
+
+    let mut names = n.clone();
+    let mut results: Vec<Pair> = Vec::new();
+
+    for node1 in names.iter(){
+        println!("looking for pairs for {}", node1);
+        for node2 in names.iter() {
+            println!("## does that pair with {}", node2);
+            if node1.eq(node2) {continue;}
+            let mut should_insert: bool = true;
+            let mut p = Pair {node1:node1.clone(), node2:node2.clone()};
+
+            
+            for result in &results {
+                // filter out equivilent dupes
+                println!("### Compairing result {}, {}, and pair {}, {} ", result.node1, result.node2, p.node1, p.node2);
+                if (result.node1.eq(node1) && result.node2.eq(node2)) || (result.node1.eq(node2) && result.node2.eq(node1)) {
+                    println!("### Found similar node, not going to insert"); 
+                    should_insert = false;
+                    break;
+                }
+            }
+
+            if should_insert {
+                println!("# pushing pair {},{}", p.node1, p.node2);
+                results.push(p);
+            }
+        }
+    }
+
+
+   return results
+}
+
+fn are_combinations_equal(set1: Vec<Pair>, set2: Vec<Pair>) -> bool {
+    false
+}
+
+#[derive(Clone)]
+struct Pair {
+    node1: String,
+    node2: String,
 }
 
 #[derive(Clone)]
@@ -163,18 +228,18 @@ struct NodeWeightMap {
 fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
     // Done in earlier function: for nodes, mark node dist(0), rest dist(infinity)
 
-    println!("There are {} DjikstraNodes", graph.nodes.keys().len());
+    //println!("There are {} DjikstraNodes", graph.nodes.keys().len());
 
     if start.eq(&graph.start_node) {
         let mut node_being_looked_at: DjikstraNode = graph.nodes.remove(start).unwrap();
         node_being_looked_at.total_distance = 0;
         node_being_looked_at.path.push(start.clone());
-        println!("Start {} and start node {} are equal. Path: {}", start, &graph.start_node, node_being_looked_at.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+        //println!("Start {} and start node {} are equal. Path: {}", start, &graph.start_node, node_being_looked_at.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
         graph.nodes.insert(start.clone(), node_being_looked_at);
     }
 
     let current_node_name = start;
-    println!("Starting search on node {}", current_node_name);
+    //println!("Starting search on node {}", current_node_name);
 
     let mut current_node = graph.nodes.remove(current_node_name).unwrap();
 
@@ -182,7 +247,7 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
     let mut distance_of_closest_node: u16 = u16::MAX;
     for node in current_node.adj_nodes.iter() {
         if graph.nodes.get(&node.name).unwrap().traversed { 
-            println!("Node {} has already been traveled", &node.name);
+            //println!("Node {} has already been traveled", &node.name);
             continue;
          }
         let mut node_being_looked_at: DjikstraNode = graph.nodes.remove(&node.name).unwrap();
@@ -197,17 +262,17 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
                     node_being_looked_at.path.push(p.clone());
                 }
                 node_being_looked_at.path.push(node.name.clone());
-                println!("Node being looked at path was empty, is now {}", node_being_looked_at.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+                //println!("Node being looked at path was empty, is now {}", node_being_looked_at.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
             }
             else
             {
                 node_being_looked_at.path = current_node.path.clone();
                 node_being_looked_at.path.push(node.name.clone());
-                println!("Node being looked at path was not empty, is now {}", node_being_looked_at.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+                //println!("Node being looked at path was not empty, is now {}", node_being_looked_at.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
 
             }
         } else {
-            println!("node weight {} was not less than node being looked at total distance {}", node.weight, node_being_looked_at.total_distance);
+            //println!("node weight {} was not less than node being looked at total distance {}", node.weight, node_being_looked_at.total_distance);
         }
 
 
@@ -222,11 +287,11 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
     current_node.traversed = true;
     graph.nodes.insert(current_node_name.to_string(), current_node);
 
-    println!("Found closest node {} with distance of {}", name_of_closest_node, distance_of_closest_node);
+    //println!("Found closest node {} with distance of {}", name_of_closest_node, distance_of_closest_node);
 
     // recurse
     if !name_of_closest_node.is_empty() {
-        println!("Found a closest node {}, recursing", name_of_closest_node);
+        // println!("Found a closest node {}, recursing", name_of_closest_node);
         find_shortest_path(&name_of_closest_node.clone(), graph);
     }
 }
