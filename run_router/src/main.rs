@@ -136,12 +136,22 @@ fn main() -> Result<(), csv::Error> {
         }
     }
 
-    let pairs: Vec<Pair> = get_pair_combinations(&odd_nodes);
-
+    let pairs: Vec<Pair> = get_pairs(&odd_nodes);
     println!("These are the pairs");
     for pair in pairs.iter() {
         println!("{},{}", pair.node1, pair.node2);
     }
+
+
+    let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
+    for pair_combination in pair_combinations.iter() {
+        println!("Combination");
+        for combination in pair_combination
+        {
+            print!("{} {}, ", combination.node1, combination.node2);
+        }
+    }
+
 
     // get combinations of all the odd nodes 
     
@@ -157,7 +167,62 @@ fn main() -> Result<(), csv::Error> {
     Ok(())
 }
 
-fn get_pair_combinations(n: &Vec<String>) -> Vec<Pair> {
+fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
+    let mut pairs = p.clone();
+    let mut results: Vec<Vec<Pair>> = Vec::new();
+    let mut nodes: Vec<String> = Vec::new();
+
+    for pair in pairs.iter() {
+        let mut insert_node1: bool = true;
+        let mut insert_node2: bool = true;
+        if nodes.iter().any(|i| i.eq(&pair.node1)) {
+            insert_node1 = false;
+        }
+
+        if nodes.iter().any(|i| i.eq(&pair.node2)) {
+            insert_node2 = false;
+        }
+        
+        if insert_node1 {nodes.push(pair.node1.clone());}
+        if insert_node2 {nodes.push(pair.node2.clone());}
+    }
+
+    for pair in pairs.iter() {
+        println!("#### getting pair combinations starting with {} {}", pair.node1, pair.node2);
+        results.push(get_pair_combinations(p, nodes.clone()))
+    }
+
+    return results;
+}
+
+fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>) -> Vec<Pair> {
+    let mut result: Vec<Pair> = Vec::new();
+    let mut pairs = p.clone();
+    let mut nodes = n.clone();
+    for pair in pairs.iter() {
+        println!("Checking pair {} {}, with nodes left {}", pair.node1, pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+        // if the node contains both "unused" values, add it to a list
+        if nodes.iter().any(|i| i.eq(&pair.node1)) && nodes.iter().any(|i| i.eq(&pair.node2)) {
+            // add the pair
+            result.push(pair.clone());
+            // remove the nodes from the acceptable list
+            nodes.retain(|x| !x.eq(&pair.node1) );
+            nodes.retain(|x| !x.eq(&pair.node2));
+            println!("Pushing pair {} {}, now nodes left are {}", pair.node1, pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+            if nodes.len() > 0 {
+                println!("####recursing");
+                result.append(&mut get_pair_combinations(p, nodes.clone()))
+            }
+        } else {
+            println!("Pair {} {} has used values, skipping", pair.node1, pair.node2);
+        }
+    }
+
+    return result
+
+}
+
+fn get_pairs(n: &Vec<String>) -> Vec<Pair> {
     
     if n.len() % 2 != 0 { panic!("There should never be an odd number of pair options");}
 
