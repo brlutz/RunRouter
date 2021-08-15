@@ -145,7 +145,7 @@ fn main() -> Result<(), csv::Error> {
 
     let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
     for pair_combination in pair_combinations.iter() {
-        println!("Combination");
+        println!("\nCombination");
         for combination in pair_combination
         {
             print!("{} {}, ", combination.node1, combination.node2);
@@ -189,34 +189,78 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
 
     for pair in pairs.iter() {
         println!("#### getting pair combinations starting with {} {}", pair.node1, pair.node2);
-        results.push(get_pair_combinations(p, nodes.clone()))
+        let combinations: Vec<Pair> = get_pair_combinations(p, nodes.clone(), Some(pair.clone()));
+        
+        let mut should_insert_combination: bool = true;
+        for result in results.iter() {
+            
+            if are_sets_of_pairs_eqivilent(result, &combinations) {
+                should_insert_combination = false;
+                break;
+            }
+        }
+        if should_insert_combination {
+            results.push(combinations);
+        }
     }
 
     return results;
 }
 
-fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>) -> Vec<Pair> {
+fn are_sets_of_pairs_eqivilent(one_pairs: &Vec<Pair>, two_pairs: &Vec<Pair>) -> bool {
+    
+    let result: bool = false;
+    if one_pairs.len() != two_pairs.len() { return false;}
+
+    for one in one_pairs {
+        let mut found: bool = false;
+        for two in two_pairs {
+            if (one.node1 == two.node1 && one.node2 == two.node2) || (one.node1 == two.node2 && one.node2 == two.node1){
+                found = true;
+            }
+        }
+        if !found { return false; }
+    }
+
+    return true;
+}
+
+fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<Pair>) -> Vec<Pair> {
     let mut result: Vec<Pair> = Vec::new();
     let mut pairs = p.clone();
     let mut nodes = n.clone();
-    for pair in pairs.iter() {
-        println!("Checking pair {} {}, with nodes left {}", pair.node1, pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
-        // if the node contains both "unused" values, add it to a list
-        if nodes.iter().any(|i| i.eq(&pair.node1)) && nodes.iter().any(|i| i.eq(&pair.node2)) {
-            // add the pair
-            result.push(pair.clone());
-            // remove the nodes from the acceptable list
-            nodes.retain(|x| !x.eq(&pair.node1) );
-            nodes.retain(|x| !x.eq(&pair.node2));
-            println!("Pushing pair {} {}, now nodes left are {}", pair.node1, pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
-            if nodes.len() > 0 {
-                println!("####recursing");
-                result.append(&mut get_pair_combinations(p, nodes.clone()))
+
+    match start_pair {
+        Some(selected_start_pair) => 
+        {
+            println!("Found a start pair");
+
+            println!("Checking pair {} {}, with nodes left {}",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+
+            // if the node contains both "unused" values, add it to a list
+            if nodes.iter().any(|i| i.eq(&selected_start_pair.node1)) && nodes.iter().any(|i| i.eq(&selected_start_pair.node2)) {
+                // add the pair
+                result.push(selected_start_pair.clone());
+                // remove the nodes from the acceptable list
+                nodes.retain(|x| !x.eq(&selected_start_pair.node1) );
+                nodes.retain(|x| !x.eq(&selected_start_pair.node2));
+                println!("Pushing pair {} {}, now nodes left are {}", selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+                if nodes.len() > 0 {
+                    println!("####recursing");
+                    for pair in pairs.iter() {
+                        result.append(&mut get_pair_combinations(p, nodes.clone(), Some(pair.clone())))
+                    }
+                    
+                }
+            } else {
+                println!("Pair {} {} has used values, skipping", selected_start_pair.node1, selected_start_pair.node2);
             }
-        } else {
-            println!("Pair {} {} has used values, skipping", pair.node1, pair.node2);
+        
+        } 
+        None => {
+            panic!("We always should have a start pair");
         }
-    }
+    };
 
     return result
 
