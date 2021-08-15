@@ -27,18 +27,23 @@ struct MapResult {
 
 fn get_data() -> Result<Vec<Record>, csv::Error> {
 
-    /*let csv = "node1,node2,weight
+    /* let csv = "node1,node2,weight
     1,2,1
     5,3,1
     1,4,1
     2,3,1
     2,5,1
     3,4,1
-    4,5,1";*/
+    4,5,1"; */
 
     let csv = "node1,node2,weight
-    1,2,1
-    2,3,1";
+    1,2,4
+    5,3,7
+    1,4,1
+    2,3,2
+    2,5,1
+    3,4,6
+    4,5,1";
 
     let mut reader = csv::Reader::from_reader(csv.as_bytes());
     let mut vec: Vec<Record> = Vec::new();
@@ -80,7 +85,7 @@ fn main() -> Result<(), csv::Error> {
     for (key, node) in d.nodes.iter()
     {
         for n in node.adj_nodes.iter() {
-            println!("Key: {}, Destination: {}, Weight: {}", key, n.name, n.weight)
+            println!("Key: {}, Destination: {}, Weight: {}", key, n.name, n.weight);
         }
     }
 
@@ -105,23 +110,23 @@ fn main() -> Result<(), csv::Error> {
 
     for odd_node in odd_nodes {
         let mut graph: DjikstraNodes = DjikstraNodes {
-            start_node: odd_node.clone(),
+            start_node: "1".to_string(),//odd_node.clone(),
             nodes: d.nodes.clone(),
         };
         find_shortest_path(&graph.start_node.clone(), &mut graph);
         maps_for_odd_nodes.insert(graph.start_node.clone(), graph);
-        break;
+        break
     }
 
     for (key, dn) in maps_for_odd_nodes.iter()
     {
+        println!("Map for odd node: {}", key);
         for (k, dnode ) in dn.nodes.iter()
         {
-            for n in dnode.adj_nodes.iter() {
-                let path: String = dnode.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(",");
-                println!("Start Node: {}, Destination: {}, Path: {}, Path Weight: {}", key, n.name, path, n.weight)
-            }
-
+            println!("Traveling to node {} (out of {} nodes)",k, dn.nodes.keys().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+            let path: String = dnode.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(",");
+            println!("{} -> {}, Path: {}, Total Distance: {}", key, dnode.name, path, dn.nodes.get(&dnode.name).unwrap().total_distance);
+        
         }
     }
 
@@ -159,6 +164,8 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
     };
     */
 
+    println!("There are {} DjikstraNodes", graph.nodes.keys().len());
+
     if start.eq(&graph.start_node) {
         let mut node_being_looked_at: DjikstraNode = graph.nodes.remove(start).unwrap();
         node_being_looked_at.total_distance = 0;
@@ -172,18 +179,19 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
 
     let mut current_node = graph.nodes.remove(current_node_name).unwrap();
 
-
+    let mut name_of_closest_node:String = "".to_string();
+    let mut distance_of_closest_node: u16 = u16::MAX;
     for node in current_node.adj_nodes.iter() {
         if graph.nodes.get(&node.name).unwrap().traversed { 
             println!("Node {} has already been traveled", &node.name);
             continue;
          }
         let mut node_being_looked_at: DjikstraNode = graph.nodes.remove(&node.name).unwrap();
-        println!("Looking at node {}", &node.name);
+        println!("Looking at node {}", node_being_looked_at.name);
         // for node update edges with total distance from node if distance less than existing distance
             // update nodes edges with map from node -> neighbors
-        if node.weight < node_being_looked_at.total_distance {
-            node_being_looked_at.total_distance = node.weight;
+        if node.weight+current_node.total_distance < node_being_looked_at.total_distance {
+            node_being_looked_at.total_distance = node.weight+current_node.total_distance;
             if node_being_looked_at.path.len() == 0 {
                 
                 for p in current_node.path.iter() {
@@ -194,7 +202,7 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
             }
             else
             {
-                node_being_looked_at.path = graph.nodes.get_mut(current_node_name).unwrap().path.clone();
+                node_being_looked_at.path = current_node.path.clone();
                 node_being_looked_at.path.push(node.name.clone());
                 println!("Node being looked at path was not empty, is now {}", node_being_looked_at.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
 
@@ -202,21 +210,18 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
         } else {
             println!("node weight {} was not less than node being looked at total distance {}", node.weight, node_being_looked_at.total_distance);
         }
+
+
         graph.nodes.insert(node.name.to_string(), node_being_looked_at);
+
+        if !graph.nodes.get(&node.name).unwrap().traversed && graph.nodes.get(&node.name).unwrap().total_distance < distance_of_closest_node {
+            distance_of_closest_node = graph.nodes.get(&node.name).unwrap().total_distance;
+            name_of_closest_node = node.name.clone();
+        }
     }
 
     current_node.traversed = true;
     graph.nodes.insert(current_node_name.to_string(), current_node);
-
-    let mut name_of_closest_node:String = "".to_string();
-    let mut distance_of_closest_node: u16 = u16::MAX;
-    for (_key, node) in graph.nodes.iter()
-    {
-        if !node.traversed && node.total_distance < distance_of_closest_node {
-            distance_of_closest_node = node.total_distance;
-            name_of_closest_node = node.name.clone();
-        }
-    }
 
     println!("Found closest node {} with distance of {}", name_of_closest_node, distance_of_closest_node);
 
