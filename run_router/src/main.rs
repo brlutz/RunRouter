@@ -86,7 +86,7 @@ fn main() -> Result<(), csv::Error> {
     }
     
     let edges = map_data(&vec);
-
+    let nodes = map_nodes(&vec);
     let d = map_to_djikstra_nodes(&vec);
 
     for (key, node) in d.nodes.iter()
@@ -173,12 +173,21 @@ fn main() -> Result<(), csv::Error> {
 
     // get cheapest edges
     let cheapest_pairs = pair_combinations[cheapest_index].to_owned();
-    println!("Cheapest combination is \n");
+    println!("Cheapest combination is:");
     for pair in cheapest_pairs.iter() {
         print!("{} {}, ", pair.node1, pair.node2);
     }   
     println!("With cost: {}", cheapest_value);
+    
+    
     // connect edges
+    for pair in cheapest_pairs.iter() {
+        println!("Going to connect {}->{} ", pair.node1, pair.node2);
+        let path: Vec<String> = maps_for_odd_nodes.get(&pair.node1).unwrap().nodes.get(&pair.node2).unwrap().path.clone();
+        for i in 0..path.len()-1 {
+            connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Node>)
+        }
+    }  
 
     // find eulerian path. 
 
