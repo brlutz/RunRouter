@@ -113,7 +113,7 @@ fn main() -> Result<(), csv::Error> {
         None => { println!("Is eulerized");}
     };
 
-    // find maps for all the odd nodse
+    // find maps for all the odd nodes
     let mut maps_for_odd_nodes: HashMap<String, DjikstraNodes> = HashMap::new();
     for odd_node in odd_nodes.iter() {
         let mut graph: DjikstraNodes = DjikstraNodes {
@@ -136,30 +136,48 @@ fn main() -> Result<(), csv::Error> {
         }
     }
 
+    // find all the possible pairs
     let pairs: Vec<Pair> = get_pairs(&odd_nodes);
     println!("These are the pairs");
     for pair in pairs.iter() {
         println!("{},{}", pair.node1, pair.node2);
     }
 
-
+    // find all possible pair combinations
     let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
+
+    // get combinations costs
+    let mut costs: Vec<u16> = Vec::new();
     for pair_combination in pair_combinations.iter() {
-        println!("\nCombination");
-        for combination in pair_combination
-        {
-            print!("{} {}, ", combination.node1, combination.node2);
+        println!("\n Combination");
+        let mut cost = 0;
+        for pair in pair_combination.iter() {
+            print!("{} {}, ", pair.node1, pair.node2);
+            cost += maps_for_odd_nodes.get(&pair.node1).unwrap().nodes.get(&pair.node2).unwrap().total_distance 
+        }   
+        costs.push(cost);
+        print!(" Cost: {} ", cost);
+    }
+
+    // find location of edges with smallest total distance
+    let mut cheapest_value = u16::MAX;
+    let mut cheapest_index = 0;
+    for i in 0..(costs.len()-1) {
+        if costs[i] < cheapest_value {
+            cheapest_index = i;
+            cheapest_value = costs[i];
         }
     }
 
+    println!("Cheapest is at {} with cost {}", cheapest_index, cheapest_value);
 
-    // get combinations of all the odd nodes 
-    
-
-    // remove duplicate combinations
-
-    // find edges with smallest total distance
-
+    // get cheapest edges
+    let cheapest_pairs = pair_combinations[cheapest_index].to_owned();
+    println!("Cheapest combination is \n");
+    for pair in cheapest_pairs.iter() {
+        print!("{} {}, ", pair.node1, pair.node2);
+    }   
+    println!("With cost: {}", cheapest_value);
     // connect edges
 
     // find eulerian path. 
@@ -188,7 +206,7 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
     }
 
     for pair in pairs.iter() {
-        println!("#### getting pair combinations starting with {} {}", pair.node1, pair.node2);
+       // println!("#### getting pair combinations starting with {} {}", pair.node1, pair.node2);
         let combinations: Vec<Pair> = get_pair_combinations(p, nodes.clone(), Some(pair.clone()));
         
         let mut should_insert_combination: bool = true;
@@ -233,9 +251,9 @@ fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<P
     match start_pair {
         Some(selected_start_pair) => 
         {
-            println!("Found a start pair");
+            // println!("Found a start pair");
 
-            println!("Checking pair {} {}, with nodes left {}",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+            // println!("Checking pair {} {}, with nodes left {}",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
 
             // if the node contains both "unused" values, add it to a list
             if nodes.iter().any(|i| i.eq(&selected_start_pair.node1)) && nodes.iter().any(|i| i.eq(&selected_start_pair.node2)) {
@@ -244,16 +262,16 @@ fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<P
                 // remove the nodes from the acceptable list
                 nodes.retain(|x| !x.eq(&selected_start_pair.node1) );
                 nodes.retain(|x| !x.eq(&selected_start_pair.node2));
-                println!("Pushing pair {} {}, now nodes left are {}", selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+               // println!("Pushing pair {} {}, now nodes left are {}", selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
                 if nodes.len() > 0 {
-                    println!("####recursing");
+                    // println!("####recursing");
                     for pair in pairs.iter() {
                         result.append(&mut get_pair_combinations(p, nodes.clone(), Some(pair.clone())))
                     }
                     
                 }
             } else {
-                println!("Pair {} {} has used values, skipping", selected_start_pair.node1, selected_start_pair.node2);
+               //  println!("Pair {} {} has used values, skipping", selected_start_pair.node1, selected_start_pair.node2);
             }
         
         } 
@@ -274,9 +292,9 @@ fn get_pairs(n: &Vec<String>) -> Vec<Pair> {
     let mut results: Vec<Pair> = Vec::new();
 
     for node1 in names.iter(){
-        println!("looking for pairs for {}", node1);
+        // println!("looking for pairs for {}", node1);
         for node2 in names.iter() {
-            println!("## does that pair with {}", node2);
+            // println!("## does that pair with {}", node2);
             if node1.eq(node2) {continue;}
             let mut should_insert: bool = true;
             let mut p = Pair {node1:node1.clone(), node2:node2.clone()};
@@ -284,16 +302,16 @@ fn get_pairs(n: &Vec<String>) -> Vec<Pair> {
             
             for result in &results {
                 // filter out equivilent dupes
-                println!("### Compairing result {}, {}, and pair {}, {} ", result.node1, result.node2, p.node1, p.node2);
+                 // println!("### Compairing result {}, {}, and pair {}, {} ", result.node1, result.node2, p.node1, p.node2);
                 if (result.node1.eq(node1) && result.node2.eq(node2)) || (result.node1.eq(node2) && result.node2.eq(node1)) {
-                    println!("### Found similar node, not going to insert"); 
+                    // println!("### Found similar node, not going to insert"); 
                     should_insert = false;
                     break;
                 }
             }
 
             if should_insert {
-                println!("# pushing pair {},{}", p.node1, p.node2);
+                // println!("# pushing pair {},{}", p.node1, p.node2);
                 results.push(p);
             }
         }
@@ -360,7 +378,7 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
             continue;
          }
         let mut node_being_looked_at: DjikstraNode = graph.nodes.remove(&node.name).unwrap();
-        println!("Looking at node {}", node_being_looked_at.name);
+        // println!("Looking at node {}", node_being_looked_at.name);
         // for node update edges with total distance from node if distance less than existing distance
             // update nodes edges with map from node -> neighbors
         if node.weight+current_node.total_distance < node_being_looked_at.total_distance {
