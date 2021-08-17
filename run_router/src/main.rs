@@ -36,16 +36,16 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     3,4,1
     4,5,1"; */
 
-    /*let csv = "node1,node2,weight
+    let csv = "node1,node2,weight
     1,2,4
     5,3,7
     1,4,1
     2,3,2
     2,5,1
     3,4,6
-    4,5,1";*/
+    4,5,1";
 
-    let csv = "node1,node2,weight
+    /*let csv = "node1,node2,weight
     0,1,4
     0,7,8
     1,2,8
@@ -59,7 +59,7 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     5,6,2
     6,8,6
     6,7,1
-    7,8,7";
+    7,8,7";*/
 
     let mut reader = csv::Reader::from_reader(csv.as_bytes());
     let mut vec: Vec<Record> = Vec::new();
@@ -86,7 +86,7 @@ fn main() -> Result<(), csv::Error> {
     }
     
     let edges = map_data(&vec);
-    let nodes = map_nodes(&vec);
+    let mut nodes = map_nodes(&vec);
     let d = map_to_djikstra_nodes(&vec);
 
     for (key, node) in d.nodes.iter()
@@ -184,10 +184,24 @@ fn main() -> Result<(), csv::Error> {
     for pair in cheapest_pairs.iter() {
         println!("Going to connect {}->{} ", pair.node1, pair.node2);
         let path: Vec<String> = maps_for_odd_nodes.get(&pair.node1).unwrap().nodes.get(&pair.node2).unwrap().path.clone();
+        println!("Path is {}", path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
         for i in 0..path.len()-1 {
-            connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Node>)
+            println!("i is {}", i);
+            let weight = edges.iter().find(|&x| (x.node1 == path[i] && x.node2 == path[i+1]) || (x.node2 == path[i] && x.node1 == path[i+1])).unwrap().weight;
+            // let weight = maps_for_odd_nodes.get(&path[i].clone()).unwrap().nodes.get(&path[i+1].clone()).unwrap().adj_nodes.iter().find(|&x| x.name == path[i+1]).unwrap().weight;
+            // let weight = nodes.get(&path[i].clone()).unwrap().edges.iter().find(|&x| x.node2 == path[i+1]).unwrap().weight.clone();
+            nodes = connect_nodes(path[i].clone(),path[i+1].clone(), weight, nodes );
+            nodes = connect_nodes(path[i+1].clone(),path[i].clone(), weight, nodes );
         }
     }  
+
+
+    for (key, node) in nodes.iter()
+    {
+        for edge in node.edges.iter() {
+            println!("Key: {}, Destination: {}, Weight: {}", key, edge.node2, edge.weight)
+        }
+    }
 
     // find eulerian path. 
 
