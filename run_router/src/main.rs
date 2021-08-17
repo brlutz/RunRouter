@@ -205,7 +205,24 @@ fn main() -> Result<(), csv::Error> {
 
     // find eulerian path. 
 
+
     Ok(())
+}
+
+fn find_eulerian_circuit(n: &Vec<Node>, start: String) -> MapResult{
+    let result:MapResult = MapResult {
+        map: Vec::new(),
+        weight: 0
+    };
+
+    // hierholtzer algo
+    // random walk among non traversed edges to find path
+    // for each vert in path, check to see if edges are untravelled
+    // # if they're untraveled, take them and travel until back at starting
+    // insert that map ito the spot of the current node
+    // repeat # 
+
+    return result;
 }
 
 fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
