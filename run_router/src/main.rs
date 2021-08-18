@@ -8,16 +8,18 @@ struct Record {
     node2: String,
     weight: u16,
 }
-
+#[derive(Clone)]
 struct Node {
     name: String,
     edges: Vec<Edge>,
 }
 
+#[derive(Clone)]
 struct Edge {
     node1: String,
     node2: String,
     weight: u16,
+    traversed: bool
 }
 
 struct MapResult {
@@ -86,7 +88,7 @@ fn main() -> Result<(), csv::Error> {
     }
     
     let edges = map_data(&vec);
-    let mut nodes = map_nodes(&vec);
+    let mut nodes: HashMap<String, Node> = map_nodes(&vec);
     let d = map_to_djikstra_nodes(&vec);
 
     for (key, node) in d.nodes.iter()
@@ -204,25 +206,133 @@ fn main() -> Result<(), csv::Error> {
     }
 
     // find eulerian path. 
+    let map_result = find_eulerian_circuit(&mut nodes, "1".to_string());
+
+    println!("Distance {}, map: {}", map_result.weight, map_result.map.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
 
 
     Ok(())
 }
 
-fn find_eulerian_circuit(n: &Vec<Node>, start: String) -> MapResult{
-    let result:MapResult = MapResult {
+
+fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: String) -> MapResult {
+    
+
+    let mut result_map:MapResult = MapResult {
         map: Vec::new(),
         weight: 0
     };
 
-    // hierholtzer algo
-    // random walk among non traversed edges to find path
-    // for each vert in path, check to see if edges are untravelled
-    // # if they're untraveled, take them and travel until back at starting
-    // insert that map ito the spot of the current node
-    // repeat # 
+    // let mut nodes = n.clone();
+    let mut current_node_name = start_node_name.clone();
+    loop {
+        let mut next_map = MapResult {
+            map: Vec::new(),
+            weight: 0,
+        };
+        // hierholtzer algo
+        // random walk among non traversed edges to find path
+        
+        loop {
 
-    return result;
+            let mut current_node = nodes.remove(&current_node_name).unwrap();
+            let current_node_name = &current_node.name.clone();
+            let mut next_node_name = "BAD NODE".to_string();
+            let edges_len = current_node.edges.len();
+
+            for i in 0..edges_len-1 {
+                // for each vert in path, check to see if edges are untravelled
+                if current_node.edges[i].clone().traversed {continue;}
+
+                // if they're untraveled, take them and travel until back at starting
+
+                // mark original edge as traversed
+                current_node.edges[i].traversed = true;
+                next_node_name = current_node.edges[i].node2.clone();
+                nodes.insert(current_node_name.clone(), current_node.to_owned());
+
+                // update the map the first time
+                if next_map.map.len() == 0
+                {
+                    next_map.map.push(current_node_name.clone());
+                }
+
+                // update corresponding edge in the destination node
+                
+                let mut node_to_update_edge = nodes.remove(&next_node_name).unwrap();
+                let position_of_edge_to_update = node_to_update_edge.edges.iter().position(|x| x.node1 == current_node.edges[i].node2 && x.node2 == current_node.edges[i].node1).unwrap();
+                let weight_of_edge = node_to_update_edge.edges[position_of_edge_to_update].weight;
+                node_to_update_edge.edges[position_of_edge_to_update].traversed = true;
+                nodes.insert(node_to_update_edge.name.clone(), node_to_update_edge);
+
+                // update the map the first time
+                if next_map.map.len() == 0
+                {
+                    next_map.map.push(current_node_name.clone());
+                    
+                } else 
+                {
+                    next_map.map.push(next_node_name.clone());
+                }
+                next_map.weight = next_map.weight + weight_of_edge;
+                break;
+            
+            }
+
+            // # if they're untraveled, take them and travel until back at starting
+            if next_node_name.eq(&start_node_name) { break; }
+
+        }
+
+        // merge maps
+        let result_map_size = result_map.map.len();
+        if result_map_size> 0 {
+            for i in 0..result_map.map.len() - 1 {
+                match next_map.map.iter().find(|&x| x.eq(&result_map.map[i])) {
+                Some (x) => {
+                    result_map.map.splice(i..i, next_map.map.clone());
+                }
+                None => {
+                    panic!("Should never not find something in the results map we have in the next map, this means disconnected graphs!");
+                }
+                }
+            }
+         }
+         else {
+             result_map = next_map;
+         }
+        
+        // find a new start node
+        for (key, node) in nodes.iter_mut()
+        {
+            let mut is_valid_node = false;
+            let mut untraversed_node: Option<String> = None;
+            for e in node.edges.iter() {
+                if e.traversed {
+                    is_valid_node = true;
+                    continue ;
+                }
+                println!("Traveling to the {} node", e.node1);
+                
+
+                untraversed_node = Some(e.node1.clone());
+            }
+            if is_valid_node {
+                match untraversed_node {
+                    Some (x) => {
+                        current_node_name = x;
+                    }
+                    None => {}
+                }
+            }
+        }
+
+        break;
+    }
+    // repeat
+    // splice the map in 
+
+    return result_map
 }
 
 fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
@@ -511,6 +621,7 @@ fn map_data(data: &Vec<Record>) -> Vec<Edge> {
             node1: record.node1.trim().to_string(),
             node2: record.node2.trim().to_string(),
             weight: record.weight,
+            traversed: true,
         };
 
         println!(
@@ -560,6 +671,7 @@ fn connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Nod
             node1: start.clone(),
             node2: end.clone(),
             weight: weight,
+            traversed: false
         };
         graph.get_mut(&start).unwrap().edges.push(e);
     } 
@@ -570,6 +682,7 @@ fn connect_nodes(start: String, end: String, weight: u16, g: HashMap<String, Nod
             node1: start.clone(),
             node2: end.clone(),
             weight: weight.clone(),
+            traversed: false,
         };
         let mut n = Node {
             name: start.clone(),
