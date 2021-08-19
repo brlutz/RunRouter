@@ -37,14 +37,26 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     3,4,1
     4,5,1"; */
 
-    let csv = "node1,node2,weight
+    /*let csv = "node1,node2,weight
     1,2,4
     5,3,7
     1,4,1
     2,3,2
     2,5,1
     3,4,6
-    4,5,1";
+    4,5,1";*/
+
+    let csv = "node1,node2,weight
+    A,B,1
+    A,C,1
+    B,C,1
+    B,D,1
+    B,E,1
+    C,D,1
+    C,E,1
+    D,E,1
+    D,F,1
+    E,F,1";
 
     /*let csv = "node1,node2,weight
     0,1,4
@@ -96,6 +108,7 @@ fn main() -> Result<(), csv::Error> {
 
     // get odd nodes
     let mut odd_nodes: Vec<String> = Vec::new();
+    let mut is_eulered = false;
     match is_eulerized(&edges) {
         Some(x) => {
             println!("Is Not eulerized");
@@ -108,131 +121,134 @@ fn main() -> Result<(), csv::Error> {
         }
         None => {
             println!("Is eulerized");
+            is_eulered = true;
         }
     };
 
-    // find maps for all the odd nodes
-    let mut maps_for_odd_nodes: HashMap<String, DjikstraNodes> = HashMap::new();
-    for odd_node in odd_nodes.iter() {
-        let mut graph: DjikstraNodes = DjikstraNodes {
-            start_node: odd_node.clone(),
-            nodes: d.nodes.clone(),
-        };
-        find_shortest_path(&graph.start_node.clone(), &mut graph);
-        maps_for_odd_nodes.insert(graph.start_node.clone(), graph);
-    }
+    if !is_eulered {
+        // find maps for all the odd nodes
+        let mut maps_for_odd_nodes: HashMap<String, DjikstraNodes> = HashMap::new();
+        for odd_node in odd_nodes.iter() {
+            let mut graph: DjikstraNodes = DjikstraNodes {
+                start_node: odd_node.clone(),
+                nodes: d.nodes.clone(),
+            };
+            find_shortest_path(&graph.start_node.clone(), &mut graph);
+            maps_for_odd_nodes.insert(graph.start_node.clone(), graph);
+        }
 
-    for (key, dn) in maps_for_odd_nodes.iter() {
-        println!("Map for odd node: {}", key);
-        for (k, dnode) in dn.nodes.iter() {
-            println!(
-                "Traveling to node {} (out of {} nodes)",
-                k,
-                dn.nodes
-                    .keys()
+        for (key, dn) in maps_for_odd_nodes.iter() {
+            println!("Map for odd node: {}", key);
+            for (k, dnode) in dn.nodes.iter() {
+                println!(
+                    "Traveling to node {} (out of {} nodes)",
+                    k,
+                    dn.nodes
+                        .keys()
+                        .map(|x| x.to_string())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                );
+                let path: String = dnode
+                    .path
+                    .iter()
                     .map(|x| x.to_string())
                     .collect::<Vec<_>>()
-                    .join(",")
-            );
-            let path: String = dnode
-                .path
-                .iter()
-                .map(|x| x.to_string())
-                .collect::<Vec<_>>()
-                .join(",");
-            println!(
-                "{} -> {}, Path: {}, Total Distance: {}",
-                key,
-                dnode.name,
-                path,
-                dn.nodes.get(&dnode.name).unwrap().total_distance
-            );
+                    .join(",");
+                println!(
+                    "{} -> {}, Path: {}, Total Distance: {}",
+                    key,
+                    dnode.name,
+                    path,
+                    dn.nodes.get(&dnode.name).unwrap().total_distance
+                );
+            }
         }
-    }
 
-    // find all the possible pairs
-    let pairs: Vec<Pair> = get_pairs(&odd_nodes);
-    println!("These are the pairs");
-    for pair in pairs.iter() {
-        println!("{},{}", pair.node1, pair.node2);
-    }
+        // find all the possible pairs
+        let pairs: Vec<Pair> = get_pairs(&odd_nodes);
+        println!("These are the pairs");
+        for pair in pairs.iter() {
+            println!("{},{}", pair.node1, pair.node2);
+        }
 
-    // find all possible pair combinations
-    let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
+        // find all possible pair combinations
+        let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
 
-    // get combinations costs
-    let mut costs: Vec<u16> = Vec::new();
-    for pair_combination in pair_combinations.iter() {
-        println!("\n Combination");
-        let mut cost = 0;
-        for pair in pair_combination.iter() {
+        // get combinations costs
+        let mut costs: Vec<u16> = Vec::new();
+        for pair_combination in pair_combinations.iter() {
+            println!("\n Combination");
+            let mut cost = 0;
+            for pair in pair_combination.iter() {
+                print!("{} {}, ", pair.node1, pair.node2);
+                cost += maps_for_odd_nodes
+                    .get(&pair.node1)
+                    .unwrap()
+                    .nodes
+                    .get(&pair.node2)
+                    .unwrap()
+                    .total_distance
+            }
+            costs.push(cost);
+            print!(" Cost: {} ", cost);
+        }
+
+        // find location of edges with smallest total distance
+        let mut cheapest_value = u16::MAX;
+        let mut cheapest_index = 0;
+        for i in 0..(costs.len() - 1) {
+            if costs[i] < cheapest_value {
+                cheapest_index = i;
+                cheapest_value = costs[i];
+            }
+        }
+
+        println!(
+            "Cheapest is at {} with cost {}",
+            cheapest_index, cheapest_value
+        );
+
+        // get cheapest edges
+        let cheapest_pairs = pair_combinations[cheapest_index].to_owned();
+        println!("Cheapest combination is:");
+        for pair in cheapest_pairs.iter() {
             print!("{} {}, ", pair.node1, pair.node2);
-            cost += maps_for_odd_nodes
+        }
+        println!("With cost: {}", cheapest_value);
+        // connect edges
+        for pair in cheapest_pairs.iter() {
+            println!("Going to connect {}->{} ", pair.node1, pair.node2);
+            let path: Vec<String> = maps_for_odd_nodes
                 .get(&pair.node1)
                 .unwrap()
                 .nodes
                 .get(&pair.node2)
                 .unwrap()
-                .total_distance
-        }
-        costs.push(cost);
-        print!(" Cost: {} ", cost);
-    }
-
-    // find location of edges with smallest total distance
-    let mut cheapest_value = u16::MAX;
-    let mut cheapest_index = 0;
-    for i in 0..(costs.len() - 1) {
-        if costs[i] < cheapest_value {
-            cheapest_index = i;
-            cheapest_value = costs[i];
-        }
-    }
-
-    println!(
-        "Cheapest is at {} with cost {}",
-        cheapest_index, cheapest_value
-    );
-
-    // get cheapest edges
-    let cheapest_pairs = pair_combinations[cheapest_index].to_owned();
-    println!("Cheapest combination is:");
-    for pair in cheapest_pairs.iter() {
-        print!("{} {}, ", pair.node1, pair.node2);
-    }
-    println!("With cost: {}", cheapest_value);
-    // connect edges
-    for pair in cheapest_pairs.iter() {
-        println!("Going to connect {}->{} ", pair.node1, pair.node2);
-        let path: Vec<String> = maps_for_odd_nodes
-            .get(&pair.node1)
-            .unwrap()
-            .nodes
-            .get(&pair.node2)
-            .unwrap()
-            .path
-            .clone();
-        println!(
-            "Path is {}",
-            path.iter()
-                .map(|x| x.to_string())
-                .collect::<Vec<_>>()
-                .join(",")
-        );
-        for i in 0..path.len() - 1 {
-            println!("i is {}", i);
-            let weight = edges
-                .iter()
-                .find(|&x| {
-                    (x.node1 == path[i] && x.node2 == path[i + 1])
-                        || (x.node2 == path[i] && x.node1 == path[i + 1])
-                })
-                .unwrap()
-                .weight;
-            // let weight = maps_for_odd_nodes.get(&path[i].clone()).unwrap().nodes.get(&path[i+1].clone()).unwrap().adj_nodes.iter().find(|&x| x.name == path[i+1]).unwrap().weight;
-            // let weight = nodes.get(&path[i].clone()).unwrap().edges.iter().find(|&x| x.node2 == path[i+1]).unwrap().weight.clone();
-            nodes = connect_nodes(path[i].clone(), path[i + 1].clone(), weight, nodes);
-            nodes = connect_nodes(path[i + 1].clone(), path[i].clone(), weight, nodes);
+                .path
+                .clone();
+            println!(
+                "Path is {}",
+                path.iter()
+                    .map(|x| x.to_string())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            );
+            for i in 0..path.len() - 1 {
+                println!("i is {}", i);
+                let weight = edges
+                    .iter()
+                    .find(|&x| {
+                        (x.node1 == path[i] && x.node2 == path[i + 1])
+                            || (x.node2 == path[i] && x.node1 == path[i + 1])
+                    })
+                    .unwrap()
+                    .weight;
+                // let weight = maps_for_odd_nodes.get(&path[i].clone()).unwrap().nodes.get(&path[i+1].clone()).unwrap().adj_nodes.iter().find(|&x| x.name == path[i+1]).unwrap().weight;
+                // let weight = nodes.get(&path[i].clone()).unwrap().edges.iter().find(|&x| x.node2 == path[i+1]).unwrap().weight.clone();
+                nodes = connect_nodes(path[i].clone(), path[i + 1].clone(), weight, nodes);
+                nodes = connect_nodes(path[i + 1].clone(), path[i].clone(), weight, nodes);
+            }
         }
     }
 
@@ -246,7 +262,7 @@ fn main() -> Result<(), csv::Error> {
     }
 
     // find eulerian path.
-    let map_result = find_eulerian_circuit(&mut nodes, "1".to_string());
+    let map_result = find_eulerian_circuit(&mut nodes, "D".to_string());
 
     println!(
         "Distance {}, map: {}",
@@ -275,8 +291,8 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
 
     for (key, node) in nodes.iter() {
         for n in node.edges.iter() {
-            println!("{}", key.eq(&"1".to_string()));
-            println!("{}", key.eq(&current_node_name));
+            //println!("{}", key.eq(&"1".to_string()));
+            // println!("{}", key.eq(&current_node_name));
             println!(
                 "Key: '{}', Start '{}' Destination: '{}', Weight: {}",
                 key, n.node1, n.node2, n.weight
@@ -337,6 +353,7 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
                     .position(|x| {
                         x.node1 == current_node.edges[i].node2
                             && x.node2 == current_node.edges[i].node1
+                            && x.traversed == false
                     })
                     .unwrap();
                 let weight_of_edge = node_to_update_edge.edges[position_of_edge_to_update].weight;
@@ -349,6 +366,17 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
                 } else {
                     next_map.map.push(next_node_name.clone());
                 }
+
+                println!(
+                    "next map is now: {}",
+                    next_map
+                        .map
+                        .iter()
+                        .map(|x| x.to_string())
+                        .collect::<Vec<_>>()
+                        .join(","),
+                );
+
                 next_map.weight = next_map.weight + weight_of_edge;
                 current_node_name = next_node_name.to_owned();
                 println!(
@@ -358,19 +386,16 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
                 break;
             }
             println!(
-                "Current/next node name UPDATED2: {}",
-                current_node_name.clone()
-            );
-            println!(
-                "Next node name: {} equals start node name {}",
+                "Next node name: {},  start node name {}",
                 next_node_name, start_node_name
             );
             // # if they're untraveled, take them and travel until back at starting
-            if next_node_name.eq(&start_node_name) {
+            if next_node_name.eq(&start_node_name) || next_node_name.eq(&"BAD NODE".to_string()) {
+                println!("NODE NAMES ARE THE SAME or we're out of nodes, BREAKING");
                 break;
             }
             count = count + 1;
-            if count > 3 {
+            if count > 500 {
                 break;
             };
         }
@@ -393,14 +418,19 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
                 .join(",")
         );
         if result_map_size > 0 {
-            for i in 0..result_map.map.len() - 1 {
-                match next_map.map.iter().find(|&x| x.eq(&result_map.map[i])) {
-                    Some(x) => {
-                        result_map.map = result_map.mapdfasdfasdfasdfadfasdfasdfasdfasd // make splice work
-                    }
-                    None => {
-                        panic!("Should never not find something in the results map we have in the next map, this means disconnected graphs!");
-                    }
+            for i in 0..(result_map.map.len() - 1) {
+                println!(
+                    "Checking to see if should insert at {} of {}, which is value {}",
+                    i,
+                    result_map.map.len(),
+                    result_map.map[i]
+                );
+                if result_map.map[i] == next_map.map[0] {
+                    let mut temp_map = result_map.map[0..i].to_vec();
+                    temp_map.append(&mut next_map.map);
+                    temp_map.append(&mut result_map.map[i + 1..].to_vec());
+                    result_map.map = temp_map;
+                    break;
                 }
             }
         } else {
@@ -416,40 +446,55 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
                 .join(",")
         );
 
-        println!("Find a new start node");
+        println!("Find a new start node with state: ");
+        for (key, node) in nodes.iter() {
+            for n in node.edges.iter() {
+                println!(
+                    "Key: '{}', Start '{}' Destination: '{}', Weight: {}, Traversed: {}",
+                    key, n.node1, n.node2, n.weight, n.traversed
+                );
+            }
+        }
+        let mut is_valid_node = false;
+        let mut untraversed_node: Option<String> = None;
         // find a new start node
         for (key, node) in nodes.iter_mut() {
             println!("Trying {}", key);
-            let mut is_valid_node = false;
-            let mut untraversed_node: Option<String> = None;
+
             for e in node.edges.iter() {
                 if e.traversed {
                     is_valid_node = true;
                     continue;
                 }
-                println!("Traveling to the {} node", e.node1);
 
                 untraversed_node = Some(e.node1.clone());
             }
-            if is_valid_node {
-                match untraversed_node {
-                    Some(x) => {
-                        println!("Setting current node name for next cycle {}", x);
-                        current_node_name = x;
-                        break;
-                    }
-                    None => {
-                        should_break = true;
-                        println!("All Done!");
-                    }
+            if is_valid_node && untraversed_node.is_some() {
+                // println!("Traveling to the {} node", untraversed_node.unwrap());
+                break;
+            }
+        }
+        if is_valid_node {
+            match untraversed_node {
+                Some(x) => {
+                    println!("Setting current node name for next cycle {}", x);
+                    current_node_name = x;
+                }
+                None => {
+                    //should_break = true;
+                    println!("All Done!");
+                    break;
                 }
             }
         }
-        if should_break {break;};
+        /* if should_break {
+            println!("Breaking because should break");
+            break;
+        };*/
     }
     // repeat
     // splice the map in
-
+    println!("End state");
     for (key, node) in nodes.iter() {
         for n in node.edges.iter() {
             println!(
