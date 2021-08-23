@@ -46,7 +46,7 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     3,4,6
     4,5,1";*/
 
-    let csv = "node1,node2,weight
+    /*let csv = "node1,node2,weight
     A,B,1
     A,C,1
     B,C,1
@@ -56,7 +56,71 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     C,E,1
     D,E,1
     D,F,1
-    E,F,1";
+    E,F,1";*/
+
+    let csv = "node1,node2,weight
+    Willow Way/Creek,Timberline/Willow,1
+Timberline/Willow, Timberline/Poplar,1
+Timberline/Poplar, Timberline/Maple,1
+Timberline/Maple, Timberline/HickoryS,1
+Timberline/HickoryS, Timberline/HickoryN,1
+Timberline/HickoryS, Timberline/HickoryN,1
+Timberline/HickoryN,Timberline/Hemlock,1
+Timberline/Hemlock, Timberline/Magnolia,1
+Timberline/Magnolia, Timberline/Rancocas,1
+Timberline/Rancocas, Rancocas/Ash,1
+Rancocas/Ash, Rancocas/Evergreen,1
+Rancocas/Evergreen, Rancocas/Overhill,1
+Rancocas/Overhill, Rancocas/WoodLane,1
+Rancocas/WoodLane, Beach/Pine,1
+Beach/Pine, Rancocas/Pine,1
+Rancocas/Pine, Rancocas/WoodLane,1
+Rancocas/Pine, Rancocas/Oak,1
+Beach/Oak, Rancocas/Oak,1
+Rancocas/Oak, Rancocas/Lake,1
+Rancocas/Lake, Rancocas/Creek,1
+Rancocas/Creek, Creek/Woodman,1
+Creek/Woodman, Creek/Conestoga,1
+Creek/Woodman, Conestoga/Woodman,1
+Willow Way/Creek, Creek/Woodman,1
+Beach/Pine, Beach/Oak,1
+Beach/Oak, Rancocas/Lake,1
+Timberline/Willow, Larch/Holly,1
+Larch/Holly, Evergreen/Larch,1
+Evergreen/Larch, Larch/Linden,1
+Larch/Linden, Poplar/Larch,1
+Poplar/Larch, Timberline/Poplar,1
+Timberline/Maple, Hemlock/Maple,1
+Hemlock/Maple, Timberline/Hemlock,1
+Hemlock/Maple, Magnolia/Maple,1
+Magnolia/Maple, Timberline/Magnolia,1
+Timberline/Rancocas, Cedar/Maple,1
+Cedar/Maple, Maple/Walnut,1
+Maple/Walnut, Maple/Linden,1
+Maple/Linden, Larch/Maple,1
+Larch/Maple, Magnolia/Maple,1
+Creek/Conestoga, Holly/Conestoga,1
+Holly/Conestoga, Larch/Holly,1
+Conestoga/Woodman, Evergreen/Woodman,1
+Holly/Conestoga, Conestoga/Woodman,1
+Evergreen/Larch, Evergreen/Woodman,1
+Cedar/Maple, Ash/Cedar,1
+Overhill/Evergreen/Walnut, Overhill/UpperPark,1
+Overhill/UpperPark, WestWood/UpperPark,1
+Rancocas/Oak, LowerParkRoad,1
+Rancocas/Lake, LowerParkRoad,1
+Rancocas/WoodLane, WestWood/UpperPark,1
+Rancocas/Overhill, Overhill/UpperPark,1
+Linden/Larch, Maple/Linden,1
+Overhill/Evergreen/Walnut, Maple/Walnut,1
+Overhill/Evergreen/Walnut, Evergreen/Woodman,1
+Ash/Cedar, Evergreen/Cedar,1
+Evergreen/Cedar, Rancocas/Evergreen,1
+Rancocas/Ash, Ash/Cedar,1
+Poplar/Larch, Larch/Maple,1
+Overhill/Evergreen/Walnut, Evergreen/Cedar,1";
+
+
 
     /*let csv = "node1,node2,weight
     0,1,4
@@ -78,6 +142,7 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     let mut vec: Vec<Record> = Vec::new();
     for record in reader.deserialize() {
         let record: Record = record?;
+        //println!("{}, {}, {}", record.node1, record.node2, record.weight);
         vec.push(record);
     }
 
@@ -106,12 +171,13 @@ fn main() -> Result<(), csv::Error> {
         }
     }
 
+   
     // get odd nodes
     let mut odd_nodes: Vec<String> = Vec::new();
     let mut is_eulered = false;
     match is_eulerized(&edges) {
         Some(x) => {
-            println!("Is Not eulerized");
+            println!("Is Not eulerized, there are {} odd nodes", x.len());
             for node in x.iter() {
                 println!("Odd degree nodes: {}", node);
             }
@@ -124,7 +190,7 @@ fn main() -> Result<(), csv::Error> {
             is_eulered = true;
         }
     };
-
+ 
     if !is_eulered {
         // find maps for all the odd nodes
         let mut maps_for_odd_nodes: HashMap<String, DjikstraNodes> = HashMap::new();
@@ -164,13 +230,15 @@ fn main() -> Result<(), csv::Error> {
                 );
             }
         }
-
+        
         // find all the possible pairs
         let pairs: Vec<Pair> = get_pairs(&odd_nodes);
-        println!("These are the pairs");
+        println!("These are the pairs. There are {}", pairs.len());
         for pair in pairs.iter() {
             println!("{},{}", pair.node1, pair.node2);
         }
+
+        
 
         // find all possible pair combinations
         let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
@@ -181,19 +249,21 @@ fn main() -> Result<(), csv::Error> {
             println!("\n Combination");
             let mut cost = 0;
             for pair in pair_combination.iter() {
-                print!("{} {}, ", pair.node1, pair.node2);
+                
                 cost += maps_for_odd_nodes
                     .get(&pair.node1)
                     .unwrap()
                     .nodes
                     .get(&pair.node2)
                     .unwrap()
-                    .total_distance
+                    .total_distance;
+                    print!("{} {}, {}", pair.node1, pair.node2, cost);
             }
             costs.push(cost);
             print!(" Cost: {} ", cost);
         }
-
+        return Ok(());
+  
         // find location of edges with smallest total distance
         let mut cheapest_value = u16::MAX;
         let mut cheapest_index = 0;
@@ -536,6 +606,7 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
         let combinations: Vec<Pair> = get_pair_combinations(p, nodes.clone(), Some(pair.clone()));
         let mut should_insert_combination: bool = true;
         for result in results.iter() {
+            println!("I'm here");
             if are_sets_of_pairs_eqivilent(result, &combinations) {
                 should_insert_combination = false;
                 break;
@@ -554,15 +625,18 @@ fn are_sets_of_pairs_eqivilent(one_pairs: &Vec<Pair>, two_pairs: &Vec<Pair>) -> 
     if one_pairs.len() != two_pairs.len() {
         return false;
     }
-
+    let mut count = 0;
     for one in one_pairs {
+
         let mut found: bool = false;
         for two in two_pairs {
+            if count % 10 == 0 {println!("I'm on pair 1 {}, and pair 2 {}", one.node1, two.node1);}
             if (one.node1 == two.node1 && one.node2 == two.node2)
                 || (one.node1 == two.node2 && one.node2 == two.node1)
             {
                 found = true;
             }
+            count = count + 1;
         }
         if !found {
             return false;
@@ -576,12 +650,12 @@ fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<P
     let mut result: Vec<Pair> = Vec::new();
     let mut pairs = p.clone();
     let mut nodes = n.clone();
-
+    println!("Start nodes are {}", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
     match start_pair {
         Some(selected_start_pair) => {
-            // println!("Found a start pair");
+            println!("Found a start pair");
 
-            // println!("Checking pair {} {}, with nodes left {}",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+            //println!("Checking pair {} {}, with nodes left {}",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
 
             // if the node contains both "unused" values, add it to a list
             if nodes.iter().any(|i| i.eq(&selected_start_pair.node1))
@@ -595,6 +669,7 @@ fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<P
                 // println!("Pushing pair {} {}, now nodes left are {}", selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
                 if nodes.len() > 0 {
                     // println!("####recursing");
+                    println!("nodes left are {}", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
                     for pair in pairs.iter() {
                         result.append(&mut get_pair_combinations(
                             p,
@@ -604,7 +679,7 @@ fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<P
                     }
                 }
             } else {
-                //  println!("Pair {} {} has used values, skipping", selected_start_pair.node1, selected_start_pair.node2);
+                println!("Pair {} {} has used values, skipping", selected_start_pair.node1, selected_start_pair.node2);
             }
         }
         None => {
@@ -612,6 +687,7 @@ fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<P
         }
     };
 
+    // println!("Done recursing!");
     return result;
 }
 
