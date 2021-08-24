@@ -599,11 +599,11 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
 
     for pair in pairs.iter() {
         println!(
-            "#### getting pair combinations starting with {} {}",
-            pair.node1, pair.node2
+            "#### getting pair combinations starting with {} {}, out of {} pairs",
+            pair.node1, pair.node2, pairs.len()
         );
         let combinations: Vec<Pair> =
-            get_pair_combinations(p, nodes.clone(), Some(pair.clone()), "".to_string());
+            get_pair_combinations(p, /*nodes.clone(), */ Some(pair.clone()), "".to_string());
         let mut should_insert_combination: bool = true;
         for result in results.iter() {
             // println!("I'm here");
@@ -649,13 +649,13 @@ fn are_sets_of_pairs_eqivilent(one_pairs: &Vec<Pair>, two_pairs: &Vec<Pair>) -> 
 
 fn get_pair_combinations(
     p: &Vec<Pair>,
-    mut n: Vec<String>,
+    // mut n: Vec<String>,
     start_pair: Option<Pair>,
     recurse_depth: String,
 ) -> Vec<Pair> {
     let mut result: Vec<Pair> = Vec::new();
     let mut pairs = p.clone();
-    let mut nodes = n.clone();
+    //let mut nodes = n.clone();
     // println!("Start nodes are {} \n", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", "));
     match start_pair {
         Some(selected_start_pair) => {
@@ -664,14 +664,14 @@ fn get_pair_combinations(
             // println!("Checking pair {} {}, with nodes left {} \n",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
 
             // if the node contains both "unused" values, add it to a list
-            if nodes.iter().any(|i| i.eq(&selected_start_pair.node1))
-                && nodes.iter().any(|i| i.eq(&selected_start_pair.node2))
+            if true //nodes.iter().any(|i| i.eq(&selected_start_pair.node1))
+                //&& nodes.iter().any(|i| i.eq(&selected_start_pair.node2))
             {
                 // add the pair
                 result.push(selected_start_pair.clone());
                 // remove the nodes from the acceptable list
-                nodes.retain(|x| !x.eq(&selected_start_pair.node1));
-                nodes.retain(|x| !x.eq(&selected_start_pair.node2));
+                //nodes.retain(|x| !x.eq(&selected_start_pair.node1));
+                //nodes.retain(|x| !x.eq(&selected_start_pair.node2));
                 // println!("There were {} pairs before", pairs.len());
                 pairs.retain(|x| {
                     !((x.node1.eq(&selected_start_pair.node1)
@@ -682,7 +682,7 @@ fn get_pair_combinations(
                 //println!("There were {} pairs after", pairs.len());
 
                 // println!("Pushing pair {} {}, now nodes left are {} \n", selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", "));
-                if nodes.len() > 0 {
+                if pairs.len() > 0 {
                     //
                     // println!("nodes left are {} \n", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", "));
                     let mut count = 0;
@@ -707,7 +707,7 @@ fn get_pair_combinations(
                         if  rand::thread_rng().gen_range(0..100000) == 42 {
                             //} && since_the_epoch.as_secs() % 2 == 0 {
                             println!(
-                                "{} recursing {} out of {} times",
+                                "{} recursing {} out of {} times.",
                                 new_recurse_depth, 
                                 count,
                                 pairs.len()
@@ -716,7 +716,7 @@ fn get_pair_combinations(
                         count = count + 1;
                         result.append(&mut get_pair_combinations(
                             &pairs,
-                            nodes.clone(),
+                            // nodes.clone(),
                             Some(pair.clone()),
                             new_recurse_depth.clone(),
                         ));
