@@ -1,5 +1,8 @@
+use rand::Rng;
 use serde::Deserialize;
 use std::collections::HashMap;
+use rand::SeedableRng;
+//use std::time::{SystemTime, UNIX_EPOCH};
 // use std::error::Error;
 
 #[derive(Deserialize)]
@@ -120,8 +123,6 @@ Rancocas/Ash, Ash/Cedar,1
 Poplar/Larch, Larch/Maple,1
 Overhill/Evergreen/Walnut, Evergreen/Cedar,1";
 
-
-
     /*let csv = "node1,node2,weight
     0,1,4
     0,7,8
@@ -171,7 +172,6 @@ fn main() -> Result<(), csv::Error> {
         }
     }
 
-   
     // get odd nodes
     let mut odd_nodes: Vec<String> = Vec::new();
     let mut is_eulered = false;
@@ -190,7 +190,6 @@ fn main() -> Result<(), csv::Error> {
             is_eulered = true;
         }
     };
- 
     if !is_eulered {
         // find maps for all the odd nodes
         let mut maps_for_odd_nodes: HashMap<String, DjikstraNodes> = HashMap::new();
@@ -230,7 +229,6 @@ fn main() -> Result<(), csv::Error> {
                 );
             }
         }
-        
         // find all the possible pairs
         let pairs: Vec<Pair> = get_pairs(&odd_nodes);
         println!("These are the pairs. There are {}", pairs.len());
@@ -238,18 +236,15 @@ fn main() -> Result<(), csv::Error> {
             println!("{},{}", pair.node1, pair.node2);
         }
 
-        
-
         // find all possible pair combinations
         let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
-
+    
         // get combinations costs
         let mut costs: Vec<u16> = Vec::new();
         for pair_combination in pair_combinations.iter() {
             println!("\n Combination");
             let mut cost = 0;
             for pair in pair_combination.iter() {
-                
                 cost += maps_for_odd_nodes
                     .get(&pair.node1)
                     .unwrap()
@@ -257,13 +252,11 @@ fn main() -> Result<(), csv::Error> {
                     .get(&pair.node2)
                     .unwrap()
                     .total_distance;
-                    print!("{} {}, {}", pair.node1, pair.node2, cost);
+                print!("{} {}, {}", pair.node1, pair.node2, cost);
             }
             costs.push(cost);
             print!(" Cost: {} ", cost);
         }
-        return Ok(());
-  
         // find location of edges with smallest total distance
         let mut cheapest_value = u16::MAX;
         let mut cheapest_index = 0;
@@ -578,6 +571,7 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
 }
 
 fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
+    println!("Getting all pair combinations");
     let mut pairs = p.clone();
     let mut results: Vec<Vec<Pair>> = Vec::new();
     let mut nodes: Vec<String> = Vec::new();
@@ -595,18 +589,24 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
 
         if insert_node1 {
             nodes.push(pair.node1.clone());
+            println!("{}", pair.node1.clone());
         }
         if insert_node2 {
             nodes.push(pair.node2.clone());
+            println!("{}", pair.node2.clone());
         }
     }
 
     for pair in pairs.iter() {
-        // println!("#### getting pair combinations starting with {} {}", pair.node1, pair.node2);
-        let combinations: Vec<Pair> = get_pair_combinations(p, nodes.clone(), Some(pair.clone()));
+        println!(
+            "#### getting pair combinations starting with {} {}",
+            pair.node1, pair.node2
+        );
+        let combinations: Vec<Pair> =
+            get_pair_combinations(p, nodes.clone(), Some(pair.clone()), "".to_string());
         let mut should_insert_combination: bool = true;
         for result in results.iter() {
-            println!("I'm here");
+            // println!("I'm here");
             if are_sets_of_pairs_eqivilent(result, &combinations) {
                 should_insert_combination = false;
                 break;
@@ -627,10 +627,11 @@ fn are_sets_of_pairs_eqivilent(one_pairs: &Vec<Pair>, two_pairs: &Vec<Pair>) -> 
     }
     let mut count = 0;
     for one in one_pairs {
-
         let mut found: bool = false;
         for two in two_pairs {
-            if count % 10 == 0 {println!("I'm on pair 1 {}, and pair 2 {}", one.node1, two.node1);}
+            if count % 10 == 0 {
+                println!("I'm on pair 1 {}, and pair 2 {}", one.node1, two.node1);
+            }
             if (one.node1 == two.node1 && one.node2 == two.node2)
                 || (one.node1 == two.node2 && one.node2 == two.node1)
             {
@@ -646,16 +647,21 @@ fn are_sets_of_pairs_eqivilent(one_pairs: &Vec<Pair>, two_pairs: &Vec<Pair>) -> 
     return true;
 }
 
-fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<Pair>) -> Vec<Pair> {
+fn get_pair_combinations(
+    p: &Vec<Pair>,
+    mut n: Vec<String>,
+    start_pair: Option<Pair>,
+    recurse_depth: String,
+) -> Vec<Pair> {
     let mut result: Vec<Pair> = Vec::new();
     let mut pairs = p.clone();
     let mut nodes = n.clone();
-    println!("Start nodes are {}", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+    // println!("Start nodes are {} \n", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", "));
     match start_pair {
         Some(selected_start_pair) => {
-            println!("Found a start pair");
+            // println!("Found a start pair");
 
-            //println!("Checking pair {} {}, with nodes left {}",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+            // println!("Checking pair {} {}, with nodes left {} \n",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
 
             // if the node contains both "unused" values, add it to a list
             if nodes.iter().any(|i| i.eq(&selected_start_pair.node1))
@@ -666,20 +672,63 @@ fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<P
                 // remove the nodes from the acceptable list
                 nodes.retain(|x| !x.eq(&selected_start_pair.node1));
                 nodes.retain(|x| !x.eq(&selected_start_pair.node2));
-                // println!("Pushing pair {} {}, now nodes left are {}", selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+                // println!("There were {} pairs before", pairs.len());
+                pairs.retain(|x| {
+                    !((x.node1.eq(&selected_start_pair.node1)
+                        || x.node2.eq(&selected_start_pair.node2))
+                        || (x.node1.eq(&selected_start_pair.node2)
+                            || x.node2.eq(&selected_start_pair.node1)))
+                });
+                //println!("There were {} pairs after", pairs.len());
+
+                // println!("Pushing pair {} {}, now nodes left are {} \n", selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", "));
                 if nodes.len() > 0 {
-                    // println!("####recursing");
-                    println!("nodes left are {}", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+                    //
+                    // println!("nodes left are {} \n", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", "));
+                    let mut count = 0;
+                    // let start = SystemTime::now();
+                    // println!("count before {}", count);
+                
+
+                        
                     for pair in pairs.iter() {
+                        let mut new_recurse_depth: String = recurse_depth.clone();
+                        new_recurse_depth.push_str("#");
+                        new_recurse_depth.push_str(&count.to_string());
+                        //println!("{}", new_recurse_depth);
+
+                        //count = count + 1;
+                        //println!("count druing {}", count);
+                        //let since_the_epoch = start
+                        //.duration_since(UNIX_EPOCH)
+                        // .expect("Time went backwards");
+                        //let in_ms = since_the_epoch.as_secs() * 1000 +
+                        //  since_the_epoch.subsec_nanos() as u64 / 1_000_000;
+                        if  rand::thread_rng().gen_range(0..100000) == 42 {
+                            //} && since_the_epoch.as_secs() % 2 == 0 {
+                            println!(
+                                "{} recursing {} out of {} times",
+                                new_recurse_depth, 
+                                count,
+                                pairs.len()
+                            );
+                        }
+                        count = count + 1;
                         result.append(&mut get_pair_combinations(
-                            p,
+                            &pairs,
                             nodes.clone(),
                             Some(pair.clone()),
-                        ))
+                            new_recurse_depth.clone(),
+                        ));
+                        
+                        if count > 2 {
+                            //panic!("Stop here lol");
+                        }
                     }
+                    //println!("count after {}", count);
                 }
             } else {
-                println!("Pair {} {} has used values, skipping", selected_start_pair.node1, selected_start_pair.node2);
+                // println!("Pair {} {} has used values, skipping\n", selected_start_pair.node1, selected_start_pair.node2);
             }
         }
         None => {
@@ -687,7 +736,7 @@ fn get_pair_combinations(p: &Vec<Pair>, mut n: Vec<String>, start_pair: Option<P
         }
     };
 
-    // println!("Done recursing!");
+    // println!("####Done recursing!\n");
     return result;
 }
 
