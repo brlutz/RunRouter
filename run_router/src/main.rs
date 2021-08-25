@@ -603,7 +603,7 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
             pair.node1, pair.node2, pairs.len()
         );
         let combinations: Vec<Pair> =
-            get_pair_combinations(p, /*nodes.clone(), */ Some(pair.clone()), "".to_string());
+            get_pair_combinations(p, /*nodes.clone(), */ pair.clone(), "".to_string());
         let mut should_insert_combination: bool = true;
         for result in results.iter() {
             // println!("I'm here");
@@ -650,15 +650,14 @@ fn are_sets_of_pairs_eqivilent(one_pairs: &Vec<Pair>, two_pairs: &Vec<Pair>) -> 
 fn get_pair_combinations(
     p: &Vec<Pair>,
     // mut n: Vec<String>,
-    start_pair: Option<Pair>,
+    selected_start_pair: Pair,
     recurse_depth: String,
 ) -> Vec<Pair> {
     let mut result: Vec<Pair> = Vec::new();
     let mut pairs = p.clone();
     //let mut nodes = n.clone();
     // println!("Start nodes are {} \n", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", "));
-    match start_pair {
-        Some(selected_start_pair) => {
+
             // println!("Found a start pair");
 
             // println!("Checking pair {} {}, with nodes left {} \n",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
@@ -717,7 +716,7 @@ fn get_pair_combinations(
                         result.append(&mut get_pair_combinations(
                             &pairs,
                             // nodes.clone(),
-                            Some(pair.clone()),
+                            pair.clone(),
                             new_recurse_depth.clone(),
                         ));
                         
@@ -730,11 +729,6 @@ fn get_pair_combinations(
             } else {
                 // println!("Pair {} {} has used values, skipping\n", selected_start_pair.node1, selected_start_pair.node2);
             }
-        }
-        None => {
-            panic!("We always should have a start pair");
-        }
-    };
 
     // println!("####Done recursing!\n");
     return result;
