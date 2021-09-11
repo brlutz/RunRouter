@@ -203,9 +203,9 @@ fn main() -> Result<(), csv::Error> {
         }
 
         for (key, dn) in maps_for_odd_nodes.iter() {
-            println!("Map for odd node: {}", key);
+            // println!("Map for odd node: {}", key);
             for (k, dnode) in dn.nodes.iter() {
-                println!(
+               /*println!(
                     "Traveling to node {} (out of {} nodes)",
                     k,
                     dn.nodes
@@ -213,20 +213,20 @@ fn main() -> Result<(), csv::Error> {
                         .map(|x| x.to_string())
                         .collect::<Vec<_>>()
                         .join(",")
-                );
+                );*/
                 let path: String = dnode
                     .path
                     .iter()
                     .map(|x| x.to_string())
                     .collect::<Vec<_>>()
                     .join(",");
-                println!(
+               /* println!(
                     "{} -> {}, Path: {}, Total Distance: {}",
                     key,
                     dnode.name,
                     path,
                     dn.nodes.get(&dnode.name).unwrap().total_distance
-                );
+                );*/
             }
         }
         // find all the possible pairs
@@ -236,12 +236,17 @@ fn main() -> Result<(), csv::Error> {
             println!("{},{}", pair.node1, pair.node2);
         }
 
+       // let optimized_pair_combinations: Vec<Vec<Pair>> = get_optimized_pair_combinations(&pair_combinations, &nodes);
+
         // find all possible pair combinations
         let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
+        let optimized_pair_combinations: Vec<Vec<Pair>> = get_optimized_pair_combinations(&pair_combinations, &nodes);
     
+        if optimized_pair_combinations.len() < 1 { panic!("There were no optimized combinations found");}
+
         // get combinations costs
         let mut costs: Vec<u16> = Vec::new();
-        for pair_combination in pair_combinations.iter() {
+        for pair_combination in optimized_pair_combinations.iter() {
             println!("\n Combination");
             let mut cost = 0;
             for pair in pair_combination.iter() {
@@ -574,28 +579,6 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
     println!("Getting all pair combinations");
     let mut pairs = p.clone();
     let mut results: Vec<Vec<Pair>> = Vec::new();
-    let mut nodes: Vec<String> = Vec::new();
-
-    for pair in pairs.iter() {
-        let mut insert_node1: bool = true;
-        let mut insert_node2: bool = true;
-        if nodes.iter().any(|i| i.eq(&pair.node1)) {
-            insert_node1 = false;
-        }
-
-        if nodes.iter().any(|i| i.eq(&pair.node2)) {
-            insert_node2 = false;
-        }
-
-        if insert_node1 {
-            nodes.push(pair.node1.clone());
-            println!("{}", pair.node1.clone());
-        }
-        if insert_node2 {
-            nodes.push(pair.node2.clone());
-            println!("{}", pair.node2.clone());
-        }
-    }
 
     for pair in pairs.iter() {
         println!(
@@ -619,6 +602,9 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
 
     return results;
 }
+
+
+
 
 fn are_sets_of_pairs_eqivilent(one_pairs: &Vec<Pair>, two_pairs: &Vec<Pair>) -> bool {
     let result: bool = false;
@@ -734,9 +720,32 @@ fn get_pair_combinations(
     return result;
 }
 
-fn get_pairs(n: &Vec<String>) -> Vec<Pair> {
+fn  get_pairs(n: &Vec<String>) -> Vec<Pair> {
     if n.len() % 2 != 0 {
         panic!("There should never be an odd number of pair options");
+    }
+
+    let mut nodes: Vec<String> = Vec::new();
+
+    for pair in pairs.iter() {
+        let mut insert_node1: bool = true;
+        let mut insert_node2: bool = true;
+        if nodes.iter().any(|i| i.eq(&pair.node1)) {
+            insert_node1 = false;
+        }
+
+        if nodes.iter().any(|i| i.eq(&pair.node2)) {
+            insert_node2 = false;
+        }
+
+        if insert_node1 {
+            nodes.push(pair.node1.clone());
+            println!("{}", pair.node1.clone());
+        }
+        if insert_node2 {
+            nodes.push(pair.node2.clone());
+            println!("{}", pair.node2.clone());
+        }
     }
 
     let mut names = n.clone();
@@ -753,6 +762,7 @@ fn get_pairs(n: &Vec<String>) -> Vec<Pair> {
             let mut p = Pair {
                 node1: node1.clone(),
                 node2: node2.clone(),
+                // distance: 0,
             };
 
             for result in &results {
@@ -765,6 +775,8 @@ fn get_pairs(n: &Vec<String>) -> Vec<Pair> {
                     should_insert = false;
                     break;
                 }
+
+                 TODO: Calculate distance between the pairs, don't forget to insert both
             }
 
             if should_insert {
@@ -777,14 +789,52 @@ fn get_pairs(n: &Vec<String>) -> Vec<Pair> {
     return results;
 }
 
-fn are_combinations_equal(set1: Vec<Pair>, set2: Vec<Pair>) -> bool {
-    false
+fn get_optimized_pair_combinations(p: &Vec<Vec<Pair>>, n: &HashMap<String, Node> ) -> Vec<Vec<Pair>> {
+    println!("Getting optimized pair combinations");
+    let mut pair_sets = p.clone();
+    let mut results: Vec<Vec<Pair>> = Vec::new();
+
+    let mut max_distance = 1;
+
+    for pair_set in pair_sets.iter() {
+        let mut all_pairs_inside_distance = true;
+        for pair in pair_set.iter() {
+
+            if !is_pair_inside_distance(pair, max_distance, n) {
+                all_pairs_inside_distance = false;
+                break;
+            }    
+        }
+        if all_pairs_inside_distance {
+            results.push(pair_set.clone());
+        }
+    }
+
+    return results;
 }
+
+fn is_pair_inside_distance(pair: &Pair, distance: i32, n: &HashMap<String, Node> ) -> bool {
+
+    if distance < 1 { panic!("Bad distance");};
+    let mut start_node = n.get(&pair.node1).unwrap();
+
+    for edge in start_node.edges.iter() {
+        if (edge.node1 == pair.node1 && edge.node2 == pair.node2) || (edge.node1 == pair.node2 && edge.node2 == pair.node1) {
+            return true;
+        }
+
+        if distance > 1 { panic! ("we haven't build that yet");}
+    }
+    
+    return false;
+}
+
 
 #[derive(Clone)]
 struct Pair {
     node1: String,
     node2: String,
+    distance: u16,
 }
 
 #[derive(Clone)]
