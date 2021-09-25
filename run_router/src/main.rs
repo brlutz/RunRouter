@@ -310,7 +310,7 @@ fn main() -> Result<(), csv::Error> {
                     .join(",")
             );
             for i in 0..path.len() - 1 {
-                println!("i is {}", i);
+                //println!("i is {}", i);
                 let weight = edges
                     .iter()
                     .find(|&x| {
@@ -329,6 +329,7 @@ fn main() -> Result<(), csv::Error> {
 
     for (key, node) in nodes.iter() {
         for edge in node.edges.iter() {
+            continue;
             println!(
                 "Key: {}, Destination: {}, Weight: {}",
                 key, edge.node2, edge.weight
@@ -337,7 +338,7 @@ fn main() -> Result<(), csv::Error> {
     }
 
     // find eulerian path.
-    let map_result = find_eulerian_circuit(&mut nodes, "D".to_string());
+    let map_result = find_eulerian_circuit(&mut nodes, "0".to_string());
 
     println!(
         "Distance {}, map: {}",
@@ -368,6 +369,7 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
         for n in node.edges.iter() {
             //println!("{}", key.eq(&"1".to_string()));
             // println!("{}", key.eq(&current_node_name));
+            continue;
             println!(
                 "Key: '{}', Start '{}' Destination: '{}', Weight: {}",
                 key, n.node1, n.node2, n.weight
@@ -382,17 +384,17 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
         // hierholtzer algo
         // random walk among non traversed edges to find path
 
-        let mut next_node_name: String = "BAD NODE".to_string();
+        let mut next_node_name: Option<String> = None;
         let mut count = 0;
         loop {
             let mut current_node = nodes.remove(&current_node_name).unwrap();
             println!("Current node name: {}", current_node_name);
-            let mut next_node_name: String = "BAD NODE".to_string();
+            let mut next_node_name: Option<String> = None;
             let edges_len = current_node.edges.len();
-            println!("There are {} edges to search", edges_len);
+            // println!("There are {} edges to search", edges_len);
             for i in 0..edges_len {
                 println!(
-                    "Looking at node1 {} node2 {} edge",
+                    "Looking at {} -> {}",
                     current_node.edges[i].node1, current_node.edges[i].node2
                 );
                 // for each vert in path, check to see if edges are untravelled
@@ -411,7 +413,7 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
 
                 // mark original edge as traversed
                 current_node.edges[i].traversed = true;
-                next_node_name = current_node.edges[i].node2.clone();
+                next_node_name = Some(current_node.edges[i].node2.clone());
                 nodes.insert(current_node_name.clone(), current_node.to_owned());
 
                 // update the map the first time
@@ -421,7 +423,7 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
                 }
 
                 // update corresponding edge in the destination node
-                let mut node_to_update_edge = nodes.remove(&next_node_name).unwrap();
+                let mut node_to_update_edge = nodes.remove(&next_node_name.as_deref().unwrap().to_string()).unwrap();
                 let position_of_edge_to_update = node_to_update_edge
                     .edges
                     .iter()
@@ -439,7 +441,7 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
                 if next_map.map.len() == 0 {
                     next_map.map.push(current_node_name.clone());
                 } else {
-                    next_map.map.push(next_node_name.clone());
+                    next_map.map.push(next_node_name.as_deref().unwrap().to_string());
                 }
 
                 println!(
@@ -453,19 +455,30 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
                 );
 
                 next_map.weight = next_map.weight + weight_of_edge;
-                current_node_name = next_node_name.to_owned();
+                current_node_name = next_node_name.as_deref().unwrap().to_string();
                 println!(
                     "Current/next node name UPDATED: {}",
                     current_node_name.clone()
                 );
                 break;
             }
-            println!(
-                "Next node name: {},  start node name {}",
-                next_node_name, start_node_name
-            );
+            match next_node_name {
+                Some(ref x) => {
+                    println!(
+                        "Next node name: {},  start node name {}",
+                        x, start_node_name
+                    );   
+                }
+                None => {
+                    println!(
+                        "There is no next node name, start node name {}",
+                        start_node_name
+                    );
+                }
+            };
+
             // # if they're untraveled, take them and travel until back at starting
-            if next_node_name.eq(&start_node_name) || next_node_name.eq(&"BAD NODE".to_string()) {
+            if next_node_name.as_deref().is_none() || next_node_name.as_deref().unwrap().eq(&start_node_name)    {
                 println!("NODE NAMES ARE THE SAME or we're out of nodes, BREAKING");
                 break;
             }
@@ -619,9 +632,9 @@ fn are_sets_of_pairs_eqivilent(one_pairs: &Vec<Pair>, two_pairs: &Vec<Pair>) -> 
     for one in one_pairs {
         let mut found: bool = false;
         for two in two_pairs {
-            if count % 10 == 0 {
+            /*if count % 10 == 0 {
                 println!("I'm on pair 1 {}, and pair 2 {}", one.node1, two.node1);
-            }
+            }*/
             if (one.node1 == two.node1 && one.node2 == two.node2)
                 || (one.node1 == two.node2 && one.node2 == two.node1)
             {
