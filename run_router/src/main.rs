@@ -239,7 +239,7 @@ fn main() -> Result<(), csv::Error> {
         let MAX_PAIR_OPTIONS:usize = 3;
         pairs = get_pairs_distance(&pairs, &maps_for_odd_nodes);
 
-        pairs = get_optimized_pairs(&pairs, MAX_PAIR_OPTIONS);
+        pairs = get_optimized_pairs(&pairs);
         // find all possible pair combinations
         let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
         
@@ -762,6 +762,7 @@ fn  get_pairs(n: &Vec<String>) -> Vec<Pair> {
                 node1: node1.clone(),
                 node2: node2.clone(),
                 distance: None,
+                path: Vec::new(),
             };
 
             for result in &results {
@@ -795,19 +796,18 @@ fn get_pairs_distance(p: &Vec<Pair>, map: &HashMap<String, DjikstraNodes> ) -> V
 
     for pair in p.iter() {
 
-       let distance = map
+       let node = map
                 .get(&pair.node1)
                 .unwrap()
                 .nodes
                 .get(&pair.node2)
-                .unwrap()
-                .total_distance
-                .clone();
+                .unwrap();
 
         let mut pair_with_distance = pair.clone();
-        pair_with_distance.distance = Some(distance); 
+        pair_with_distance.distance = Some(node.total_distance);
+        pair_with_distance.path = node.path.clone();
 
-        results.push(pair.clone());
+        results.push(pair_with_distance.clone());
     }
 
     return results;
@@ -819,21 +819,69 @@ struct NodeTraveled {
 }
 
 // get the N smallest pairs for each 
-fn get_optimized_pairs(p: &Vec<Pair>, max_pair_options: usize) -> Vec<Pair> {
-    let mut results: Vec<Pair> = Vec::new();
-    for pair in p.iter() {
-        // check to see how many times if node1 exists
-        let node1_count = results.iter().filter(|&x| x.node1 == pair.node1 || x.node2 == pair.node1).count();
-        // check to see how many times node2 exists
-        let node2_count = results.iter().filter(|&x| x.node1 == pair.node2 || x.node2 == pair.node2).count();
-        // if both exist < N times, add it
+fn get_optimized_pairs(p: &Vec<Pair>) -> Vec<Pair> {
 
-        if node1_count < max_pair_options && node2_count < max_pair_options {
-            results.push.
+    let mut nodes: Vec<String> = Vec::new();
+
+    for pair in p.iter() {
+        let mut insert_node1: bool = true;
+        let mut insert_node2: bool = true;
+        if nodes.iter().any(|i| i.eq(&pair.node1)) {
+            insert_node1 = false;
         }
-        // if one or more exists > N-1 times, find the max size for both node1/node2
-        // remove max size node1 and node2
-        // add in the new smaller one
+
+        if nodes.iter().any(|i| i.eq(&pair.node2)) {
+            insert_node2 = false;
+        }
+
+        if insert_node1 {
+            nodes.push(pair.node1.clone());
+            println!("{}", pair.node1.clone());
+        }
+        if insert_node2 {
+            nodes.push(pair.node2.clone());
+            println!("{}", pair.node2.clone());
+        }
+    }
+
+    let mut min_distance = 1;
+    let mut results: Vec<Pair> = Vec::new();
+    loop {
+    
+        let mut done_nodes: Vec<String> = Vec::new(); //nodes.clone();
+
+
+        results = Vec::new();
+        println!("Min distance: {}", min_distance);
+        for rn in done_nodes.iter() {
+                
+                print!(" {} ", rn);
+                println!("");
+        }
+
+        for pair in p.iter() {
+
+            if pair.path.len() == (min_distance + 1) { // plus 1 is because the shortest path from A->B is A,B, of len 2;
+                done_nodes.push(pair.node1.clone());
+                done_nodes.push(pair.node2.clone());
+                //remaining_nodes.retain(|x| x.as_str() != pair.node1 || x.as_str() != pair.node2);
+
+                results.push(pair.clone());
+            }
+        }
+
+        done_nodes.sort_unstable();
+        done_nodes.dedup();
+        // if we've found all the nodes, we're done, get out of here. 
+        if done_nodes.len() == nodes.len() {break;}
+
+        if min_distance > 15 {
+            // this is basically a loop stopper, obviously not valid for some graphs, but we should be able to get to everything in our map without doing 15 hops lol. 
+            // TODO: make this based off the longest path in the node maps. 
+            panic!("Something has gone wrong, it should never take this many hops to find all the nodes, something is busted somewhere.")
+        }
+        min_distance = min_distance + 1;
+        
     }
 
     return results;
@@ -861,6 +909,7 @@ struct Pair {
     node1: String,
     node2: String,
     distance: Option<u16>,
+    path: Vec<String>, 
 }
 
 #[derive(Clone)]
@@ -1119,4 +1168,72 @@ fn connect_djikstra_nodes(
     }
 
     return graph;
+}
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    #[test]
+    fn test_get_optimized_pairs_1_hop() {
+        let mut start: Vec<Pair> = Vec::new();
+        start.push(Pair {node1: "A".to_string(), node2: "B".to_string(), distance: Some(5), path: vec!["A".to_string(),"B".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "C".to_string(), distance: Some(5), path: vec!["A".to_string(),"C".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["A".to_string(),"B".to_string(), "D".to_string()]});
+        start.push(Pair {node1: "B".to_string(), node2: "C".to_string(), distance: Some(5), path: vec!["B".to_string(), "A".to_string(), "C".to_string()]});
+        start.push(Pair {node1: "B".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["B".to_string(),"D".to_string()]});
+        start.push(Pair {node1: "C".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["C".to_string(),"D".to_string()]});
+    
+       let results = get_optimized_pairs(&start);
+       for result in results.iter() {
+           println!("{}, {}, {}", result.node1, result.node2,              result.path.iter()
+           .map(|x| x.to_string())
+           .collect::<Vec<_>>()
+           .join(","))
+       }
+       assert_eq!(results.len(), 4);
+       assert_eq!(results[0].node1, "A");
+       assert_eq!(results[0].node2, "B");
+
+       assert_eq!(results[1].node1, "A");
+       assert_eq!(results[1].node2, "C");
+
+       assert_eq!(results[2].node1, "B");
+       assert_eq!(results[2].node2, "D");
+
+       assert_eq!(results[3].node1, "C");
+       assert_eq!(results[3].node2, "D");
+    }
+
+    #[test]
+    fn test_get_optimized_pairs_2_hop() {
+        let mut start: Vec<Pair> = Vec::new();
+        start.push(Pair {node1: "A".to_string(), node2: "B".to_string(), distance: Some(5), path: vec!["A".to_string(),"B".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "C".to_string(), distance: Some(5), path: vec!["A".to_string(),"C".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["A".to_string(),"B".to_string(), "D".to_string()]});
+        start.push(Pair {node1: "B".to_string(), node2: "C".to_string(), distance: Some(5), path: vec!["B".to_string(), "A".to_string(), "C".to_string()]});
+        start.push(Pair {node1: "B".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["B".to_string(),"D".to_string()]});
+        start.push(Pair {node1: "C".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["C".to_string(),"D".to_string()]});
+    
+       let results = get_optimized_pairs(&start);
+       for result in results.iter() {
+           println!("{}, {}, {}", result.node1, result.node2,              result.path.iter()
+           .map(|x| x.to_string())
+           .collect::<Vec<_>>()
+           .join(","))
+       }
+       assert_eq!(results.len(), 4);
+       assert_eq!(results[0].node1, "A");
+       assert_eq!(results[0].node2, "B");
+
+       assert_eq!(results[1].node1, "A");
+       assert_eq!(results[1].node2, "C");
+
+       assert_eq!(results[2].node1, "B");
+       assert_eq!(results[2].node2, "D");
+
+       assert_eq!(results[3].node1, "C");
+       assert_eq!(results[3].node2, "D");
+    }
 }
