@@ -60,7 +60,7 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     D,E,1
     D,F,1
     E,F,1";*/
-
+/*
     let csv = "node1,node2,weight
     Willow Way/Creek,Timberline/Willow,1
 Timberline/Willow, Timberline/Poplar,1
@@ -121,9 +121,9 @@ Ash/Cedar, Evergreen/Cedar,1
 Evergreen/Cedar, Rancocas/Evergreen,1
 Rancocas/Ash, Ash/Cedar,1
 Poplar/Larch, Larch/Maple,1
-Overhill/Evergreen/Walnut, Evergreen/Cedar,1";
+Overhill/Evergreen/Walnut, Evergreen/Cedar,1"; */
 
-    /*let csv = "node1,node2,weight
+    let csv = "node1,node2,weight
     0,1,4
     0,7,8
     1,2,8
@@ -137,7 +137,7 @@ Overhill/Evergreen/Walnut, Evergreen/Cedar,1";
     5,6,2
     6,8,6
     6,7,1
-    7,8,7";*/
+    7,8,7";
 
     let mut reader = csv::Reader::from_reader(csv.as_bytes());
     let mut vec: Vec<Record> = Vec::new();
@@ -240,6 +240,11 @@ fn main() -> Result<(), csv::Error> {
         pairs = get_pairs_distance(&pairs, &maps_for_odd_nodes);
 
         pairs = get_optimized_pairs(&pairs);
+        println!("These are the optimized pairs. There are {}", pairs.len());
+        for pair in pairs.iter() {
+            println!("{},{}", pair.node1, pair.node2);
+        }
+        //panic!("gonna check this out first");
         // find all possible pair combinations
         let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
         
