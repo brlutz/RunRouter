@@ -60,7 +60,7 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     D,E,1
     D,F,1
     E,F,1";*/
-/*
+
     let csv = "node1,node2,weight
     Willow Way/Creek,Timberline/Willow,1
 Timberline/Willow, Timberline/Poplar,1
@@ -121,8 +121,8 @@ Ash/Cedar, Evergreen/Cedar,1
 Evergreen/Cedar, Rancocas/Evergreen,1
 Rancocas/Ash, Ash/Cedar,1
 Poplar/Larch, Larch/Maple,1
-Overhill/Evergreen/Walnut, Evergreen/Cedar,1"; */
-
+Overhill/Evergreen/Walnut, Evergreen/Cedar,1"; 
+/*
     let csv = "node1,node2,weight
     0,1,4
     0,7,8
@@ -137,7 +137,7 @@ Overhill/Evergreen/Walnut, Evergreen/Cedar,1"; */
     5,6,2
     6,8,6
     6,7,1
-    7,8,7";
+    7,8,7";*/
 
     let mut reader = csv::Reader::from_reader(csv.as_bytes());
     let mut vec: Vec<Record> = Vec::new();
@@ -197,8 +197,10 @@ fn main() -> Result<(), csv::Error> {
             let mut graph: DjikstraNodes = DjikstraNodes {
                 start_node: odd_node.clone(),
                 nodes: d.nodes.clone(),
+                median_total_distance: 0
             };
             find_shortest_path(&graph.start_node.clone(), &mut graph);
+            find_median_distance(&graph.start_node.clone(), &mut graph);
             maps_for_odd_nodes.insert(graph.start_node.clone(), graph);
         }
 
@@ -239,7 +241,7 @@ fn main() -> Result<(), csv::Error> {
         let MAX_PAIR_OPTIONS:usize = 3;
         pairs = get_pairs_distance(&pairs, &maps_for_odd_nodes);
 
-        pairs = get_optimized_pairs(&pairs);
+        // pairs = get_optimized_pairs(&pairs);
         println!("These are the optimized pairs. There are {}", pairs.len());
         for pair in pairs.iter() {
             println!("{},{}", pair.node1, pair.node2);
@@ -257,17 +259,18 @@ fn main() -> Result<(), csv::Error> {
             println!("\n Combination");
             let mut cost = 0;
             for pair in pair_combination.iter() {
-                cost += maps_for_odd_nodes
-                    .get(&pair.node1)
-                    .unwrap()
-                    .nodes
-                    .get(&pair.node2)
-                    .unwrap()
-                    .total_distance;
-                print!("{} {}, {}", pair.node1, pair.node2, cost);
+                let single_cost = maps_for_odd_nodes
+                .get(&pair.node1)
+                .unwrap()
+                .nodes
+                .get(&pair.node2)
+                .unwrap()
+                .total_distance;
+                cost += single_cost;
+                print!("{}, {}, cost: {}. ", pair.node1, pair.node2, single_cost);
             }
             costs.push(cost);
-            print!(" Cost: {} ", cost);
+            print!("Total Cost: {} ", cost);
         }
         // find location of edges with smallest total distance
         let mut cheapest_value = u16::MAX;
@@ -605,8 +608,10 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
             "#### getting pair combinations starting with {} {}, out of {} pairs",
             pair.node1, pair.node2, pairs.len()
         );
+        
         let combinations: Vec<Pair> =
             get_pair_combinations(p, /*nodes.clone(), */ pair.clone(), "".to_string());
+
         let mut should_insert_combination: bool = true;
         for result in results.iter() {
             // println!("I'm here");
@@ -616,7 +621,12 @@ fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
             }
         }
         if should_insert_combination {
+            for combination in combinations.iter() {
+                print!("{}-{}, ", combination.node1, combination.node2)
+            }
+            println!("");
             results.push(combinations);
+
         }
     }
 
@@ -942,12 +952,22 @@ struct DjikstraNode {
 struct DjikstraNodes {
     start_node: String,
     nodes: HashMap<String, DjikstraNode>,
+    median_total_distance: u16
 }
 
 #[derive(Clone)]
 struct NodeWeightMap {
     name: String,
     weight: u16,
+}
+
+fn find_median_distance(start: &String, graph: &mut DjikstraNodes) -> () {
+    let mut distances: Vec<u16> = Vec::new();
+    for node in graph.nodes.get(&graph.start_node).iter() {
+        distances.push(node.total_distance);
+    }
+    distances.sort();
+    graph.median_total_distance = distances[distances.len() /2];
 }
 
 fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
@@ -1099,6 +1119,7 @@ fn map_to_djikstra_nodes(data: &Vec<Record>) -> DjikstraNodes {
     let mut g: DjikstraNodes = DjikstraNodes {
         start_node: "".to_string(),
         nodes: HashMap::new(),
+        median_total_distance: 0
     };
 
     for record in data {
