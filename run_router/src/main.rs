@@ -60,7 +60,7 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     D,E,1
     D,F,1
     E,F,1";*/
-
+/*
     let csv = "node1,node2,weight
     Willow Way/Creek,Timberline/Willow,1
 Timberline/Willow, Timberline/Poplar,1
@@ -122,7 +122,7 @@ Evergreen/Cedar, Rancocas/Evergreen,1
 Rancocas/Ash, Ash/Cedar,1
 Poplar/Larch, Larch/Maple,1
 Overhill/Evergreen/Walnut, Evergreen/Cedar,1"; 
-/*
+*/
     let csv = "node1,node2,weight
     0,1,4
     0,7,8
@@ -137,7 +137,7 @@ Overhill/Evergreen/Walnut, Evergreen/Cedar,1";
     5,6,2
     6,8,6
     6,7,1
-    7,8,7";*/
+    7,8,7";
 
     let mut reader = csv::Reader::from_reader(csv.as_bytes());
     let mut vec: Vec<Record> = Vec::new();
@@ -248,7 +248,7 @@ fn main() -> Result<(), csv::Error> {
         }
         //panic!("gonna check this out first");
         // find all possible pair combinations
-        let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs);
+        let pair_combinations: Vec<Vec<Pair>> = get_all_pair_combinations(&pairs, &maps_for_odd_nodes);
         
         
         //if optimized_pair_combinations.len() < 1 { panic!("There were no optimized combinations found");}
@@ -598,36 +598,65 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
     return result_map;
 }
 
-fn get_all_pair_combinations(p: &Vec<Pair>) -> Vec<Vec<Pair>> {
+fn get_all_pair_combinations(p: &Vec<Pair>, map: &HashMap<String, DjikstraNodes>) -> Vec<Vec<Pair>> {
     println!("Getting all pair combinations");
     let mut pairs = p.clone();
     let mut results: Vec<Vec<Pair>> = Vec::new();
 
-    for pair in pairs.iter() {
-        println!(
-            "#### getting pair combinations starting with {} {}, out of {} pairs",
-            pair.node1, pair.node2, pairs.len()
-        );
-        
-        let combinations: Vec<Pair> =
-            get_pair_combinations(p, /*nodes.clone(), */ pair.clone(), "".to_string());
+    let mut distance_threshold = 0.5;
 
-        let mut should_insert_combination: bool = true;
-        for result in results.iter() {
-            // println!("I'm here");
-            if are_sets_of_pairs_eqivilent(result, &combinations) {
-                should_insert_combination = false;
-                break;
-            }
-        }
-        if should_insert_combination {
-            for combination in combinations.iter() {
-                print!("{}-{}, ", combination.node1, combination.node2)
-            }
-            println!("");
-            results.push(combinations);
+    loop {
+        for pair in pairs.iter() {
+            println!(
+                "#### getting pair combinations starting with {} {}, out of {} pairs",
+                pair.node1, pair.node2, pairs.len()
+            );
+            
+            match get_pair_combinations(p, pair.clone(), map,  "".to_string(), distance_threshold ) {
+                Some(combinations) => {
+                    
+                    let mut should_insert_combination: bool = true;
+                    for result in results.iter() {
+                        // println!("I'm here");
+                        if are_sets_of_pairs_eqivilent(result, &combinations) {
+                            should_insert_combination = false;
+                            break;
+                        }
+                    }
+                    if should_insert_combination {
+                        for combination in combinations.iter() {
+                            print!("{}-{}, ", combination.node1, combination.node2)
+                        }
+                        println!("");
+                        results.push(combinations);
+                    }
+                },
+                None => {
 
+                }
+            };
+
+            /*let combinations: Vec<Pair> =
+                get_pair_combinations(p, /*nodes.clone(), */ pair.clone(), "".to_string());
+
+            let mut should_insert_combination: bool = true;
+            for result in results.iter() {
+                // println!("I'm here");
+                if are_sets_of_pairs_eqivilent(result, &combinations) {
+                    should_insert_combination = false;
+                    break;
+                }
+            }
+            if should_insert_combination {
+                for combination in combinations.iter() {
+                    print!("{}-{}, ", combination.node1, combination.node2)
+                }
+                println!("");
+                results.push(combinations);
+            } */
         }
+        if results.len() > 1 {break;}
+        distance_threshold = distance_threshold + 0.1;
     }
 
     return results;
@@ -664,21 +693,20 @@ fn get_pair_combinations(
     p: &Vec<Pair>,
     // mut n: Vec<String>,
     selected_start_pair: Pair,
+    map: &HashMap<String, DjikstraNodes>,
     recurse_depth: String,
-) -> Vec<Pair> {
+    distance_threshold: f32,
+) -> Option<Vec<Pair>> {
     let mut result: Vec<Pair> = Vec::new();
     let mut pairs = p.clone();
-    //let mut nodes = n.clone();
+    
     // println!("Start nodes are {} \n", nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(", "));
 
             // println!("Found a start pair");
 
             // println!("Checking pair {} {}, with nodes left {} \n",selected_start_pair.node1, selected_start_pair.node2, nodes.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
 
-            // if the node contains both "unused" values, add it to a list
-            if true //nodes.iter().any(|i| i.eq(&selected_start_pair.node1))
-                //&& nodes.iter().any(|i| i.eq(&selected_start_pair.node2))
-            {
+
                 // add the pair
                 result.push(selected_start_pair.clone());
                 // remove the nodes from the acceptable list
@@ -726,25 +754,41 @@ fn get_pair_combinations(
                             );
                         }
                         count = count + 1;
+                        println!("Pair has td: {}, compared to tmd: {}, with distance: {}",  map.get(&pair.node1).unwrap().nodes.get(&pair.node2).unwrap().total_distance as f32, map.get(&pair.node1).unwrap().median_total_distance as f32, distance_threshold );
+                        if map.get(&pair.node1).unwrap().nodes.get(&pair.node2).unwrap().total_distance as f32 > map.get(&pair.node1).unwrap().median_total_distance as f32 * distance_threshold {
+                            return None
+                        }
+
+                        match get_pair_combinations(
+                            &pairs,
+                            // nodes.clone(),
+                            pair.clone(),
+                            map,
+                            new_recurse_depth.clone(),
+                            distance_threshold,
+                        ) {
+                            Some(mut x) => {
+                                result.append(&mut x);
+                            },
+                            None => {
+                                return None;
+                            }
+                        }
+                        /*
                         result.append(&mut get_pair_combinations(
                             &pairs,
                             // nodes.clone(),
                             pair.clone(),
                             new_recurse_depth.clone(),
-                        ));
-                        
-                        if count > 2 {
-                            //panic!("Stop here lol");
-                        }
+                            distance_threshold,
+                        ).unwrap());
+                        */
                     }
                     //println!("count after {}", count);
                 }
-            } else {
-                // println!("Pair {} {} has used values, skipping\n", selected_start_pair.node1, selected_start_pair.node2);
-            }
 
     // println!("####Done recursing!\n");
-    return result;
+    return Some(result);
 }
 
 fn  get_pairs(n: &Vec<String>) -> Vec<Pair> {
