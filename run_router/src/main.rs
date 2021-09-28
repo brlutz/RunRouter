@@ -1007,11 +1007,16 @@ struct NodeWeightMap {
 
 fn find_median_distance(start: &String, graph: &mut DjikstraNodes) -> () {
     let mut distances: Vec<u16> = Vec::new();
-    for node in graph.nodes.get(&graph.start_node).iter() {
-        distances.push(node.total_distance);
+    for node in graph.nodes.get(&graph.start_node).unwrap().adj_nodes.iter() {
+        println!("looking at node {} with td: {} ", node.name, node.weight);
+        distances.push(node.weight);
     }
+    println!("distances: {}", distances.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
     distances.sort();
-    graph.median_total_distance = distances[distances.len() /2];
+    let median_distance = distances[distances.len() /2];
+    println!("The mtd for {}: {}", start, median_distance);
+    graph.median_total_distance = median_distance;
+    //panic!("ben");
 }
 
 fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
