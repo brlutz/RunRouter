@@ -9,7 +9,7 @@ use rand::SeedableRng;
 struct Record {
     node1: String,
     node2: String,
-    weight: u16,
+    weight: f32,
 }
 #[derive(Clone)]
 struct Node {
@@ -21,13 +21,13 @@ struct Node {
 struct Edge {
     node1: String,
     node2: String,
-    weight: u16,
+    weight: f32,
     traversed: bool,
 }
 
 struct MapResult {
     map: Vec<String>,
-    weight: u16,
+    weight: f32,
 }
 
 fn get_data() -> Result<Vec<Record>, csv::Error> {
@@ -197,7 +197,7 @@ fn main() -> Result<(), csv::Error> {
             let mut graph: DjikstraNodes = DjikstraNodes {
                 start_node: odd_node.clone(),
                 nodes: d.nodes.clone(),
-                median_total_distance: 0
+                median_total_distance: 0.0
             };
             find_shortest_path(&graph.start_node.clone(), &mut graph);
             find_median_distance(&graph.start_node.clone(), &mut graph);
@@ -254,10 +254,10 @@ fn main() -> Result<(), csv::Error> {
         //if optimized_pair_combinations.len() < 1 { panic!("There were no optimized combinations found");}
 
         // get combinations costs
-        let mut costs: Vec<u16> = Vec::new();
+        let mut costs: Vec<f32> = Vec::new();
         for pair_combination in pair_combinations.iter() {
             println!("\n Combination");
-            let mut cost = 0;
+            let mut cost = 0.0;
             for pair in pair_combination.iter() {
                 let single_cost = maps_for_odd_nodes
                 .get(&pair.node1)
@@ -273,7 +273,7 @@ fn main() -> Result<(), csv::Error> {
             print!("Total Cost: {} ", cost);
         }
         // find location of edges with smallest total distance
-        let mut cheapest_value = u16::MAX;
+        let mut cheapest_value = f32::MAX;
         let mut cheapest_index = 0;
         for i in 0..(costs.len() - 1) {
             if costs[i] < cheapest_value {
@@ -360,7 +360,7 @@ fn main() -> Result<(), csv::Error> {
 fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: String) -> MapResult {
     let mut result_map: MapResult = MapResult {
         map: Vec::new(),
-        weight: 0,
+        weight: 0.0,
     };
 
     // let mut nodes = n.clone();
@@ -382,7 +382,7 @@ fn find_eulerian_circuit(nodes: &mut HashMap<String, Node>, start_node_name: Str
     loop {
         let mut next_map = MapResult {
             map: Vec::new(),
-            weight: 0,
+            weight: 0.0,
         };
         // hierholtzer algo
         // random walk among non traversed edges to find path
@@ -980,14 +980,14 @@ fn is_pair_inside_distance(pair: &Pair, distance: i32, n: &HashMap<String, Node>
 struct Pair {
     node1: String,
     node2: String,
-    distance: Option<u16>,
+    distance: Option<f32>,
     path: Vec<String>, 
 }
 
 #[derive(Clone)]
 struct DjikstraNode {
     name: String,
-    total_distance: u16,
+    total_distance: f32,
     path: Vec<String>,
     traversed: bool,
     adj_nodes: Vec<NodeWeightMap>,
@@ -996,23 +996,24 @@ struct DjikstraNode {
 struct DjikstraNodes {
     start_node: String,
     nodes: HashMap<String, DjikstraNode>,
-    median_total_distance: u16
+    median_total_distance: f32
 }
 
 #[derive(Clone)]
 struct NodeWeightMap {
     name: String,
-    weight: u16,
+    weight: f32,
 }
 
 fn find_median_distance(start: &String, graph: &mut DjikstraNodes) -> () {
-    let mut distances: Vec<u16> = Vec::new();
+    let mut distances: Vec<f32> = Vec::new();
     for node in graph.nodes.get(&graph.start_node).unwrap().adj_nodes.iter() {
         println!("looking at node {} with td: {} ", node.name, node.weight);
         distances.push(node.weight);
     }
+    //println!("distances: {}", distances.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+    distances.sort_by(|a, b| a.partial_cmp(b).unwrap()); 
     println!("distances: {}", distances.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
-    distances.sort();
     let median_distance = distances[distances.len() /2];
     println!("The mtd for {}: {}", start, median_distance);
     graph.median_total_distance = median_distance;
@@ -1026,7 +1027,7 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
 
     if start.eq(&graph.start_node) {
         let mut node_being_looked_at: DjikstraNode = graph.nodes.remove(start).unwrap();
-        node_being_looked_at.total_distance = 0;
+        node_being_looked_at.total_distance = 0.0;
         node_being_looked_at.path.push(start.clone());
         //println!("Start {} and start node {} are equal. Path: {}", start, &graph.start_node, node_being_looked_at.path.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
         graph.nodes.insert(start.clone(), node_being_looked_at);
@@ -1038,7 +1039,7 @@ fn find_shortest_path(start: &String, graph: &mut DjikstraNodes) -> () {
     let mut current_node = graph.nodes.remove(current_node_name).unwrap();
 
     let mut name_of_closest_node: String = "".to_string();
-    let mut distance_of_closest_node: u16 = u16::MAX;
+    let mut distance_of_closest_node: f32 = f32::MAX;
     for node in current_node.adj_nodes.iter() {
         if graph.nodes.get(&node.name).unwrap().traversed {
             //println!("Node {} has already been traveled", &node.name);
@@ -1168,7 +1169,7 @@ fn map_to_djikstra_nodes(data: &Vec<Record>) -> DjikstraNodes {
     let mut g: DjikstraNodes = DjikstraNodes {
         start_node: "".to_string(),
         nodes: HashMap::new(),
-        median_total_distance: 0
+        median_total_distance: 0.0
     };
 
     for record in data {
@@ -1192,7 +1193,7 @@ fn map_to_djikstra_nodes(data: &Vec<Record>) -> DjikstraNodes {
 fn connect_nodes(
     start: String,
     end: String,
-    weight: u16,
+    weight: f32,
     g: HashMap<String, Node>,
 ) -> HashMap<String, Node> {
     let mut graph = g;
@@ -1227,7 +1228,7 @@ fn connect_nodes(
 fn connect_djikstra_nodes(
     start: String,
     end: String,
-    weight: u16,
+    weight: f32,
     g: DjikstraNodes,
 ) -> DjikstraNodes {
     let mut graph = g;
@@ -1245,7 +1246,7 @@ fn connect_djikstra_nodes(
             weight: weight.clone(),
         };
         let mut n = DjikstraNode {
-            total_distance: u16::MAX,
+            total_distance: f32::MAX,
             path: Vec::new(),
             adj_nodes: Vec::new(),
             traversed: false,
@@ -1266,12 +1267,12 @@ mod tests {
     #[test]
     fn test_get_optimized_pairs_1_hop() {
         let mut start: Vec<Pair> = Vec::new();
-        start.push(Pair {node1: "A".to_string(), node2: "B".to_string(), distance: Some(5), path: vec!["A".to_string(),"B".to_string()]});
-        start.push(Pair {node1: "A".to_string(), node2: "C".to_string(), distance: Some(5), path: vec!["A".to_string(),"C".to_string()]});
-        start.push(Pair {node1: "A".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["A".to_string(),"B".to_string(), "D".to_string()]});
-        start.push(Pair {node1: "B".to_string(), node2: "C".to_string(), distance: Some(5), path: vec!["B".to_string(), "A".to_string(), "C".to_string()]});
-        start.push(Pair {node1: "B".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["B".to_string(),"D".to_string()]});
-        start.push(Pair {node1: "C".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["C".to_string(),"D".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "B".to_string(), distance: Some(5.0), path: vec!["A".to_string(),"B".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "C".to_string(), distance: Some(5.0), path: vec!["A".to_string(),"C".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "D".to_string(), distance: Some(5.0), path: vec!["A".to_string(),"B".to_string(), "D".to_string()]});
+        start.push(Pair {node1: "B".to_string(), node2: "C".to_string(), distance: Some(5.0), path: vec!["B".to_string(), "A".to_string(), "C".to_string()]});
+        start.push(Pair {node1: "B".to_string(), node2: "D".to_string(), distance: Some(5.0), path: vec!["B".to_string(),"D".to_string()]});
+        start.push(Pair {node1: "C".to_string(), node2: "D".to_string(), distance: Some(5.0), path: vec!["C".to_string(),"D".to_string()]});
     
        let results = get_optimized_pairs(&start);
        for result in results.iter() {
@@ -1297,12 +1298,12 @@ mod tests {
     #[test]
     fn test_get_optimized_pairs_2_hop() {
         let mut start: Vec<Pair> = Vec::new();
-        start.push(Pair {node1: "A".to_string(), node2: "B".to_string(), distance: Some(5), path: vec!["A".to_string(),"B".to_string()]});
-        start.push(Pair {node1: "A".to_string(), node2: "C".to_string(), distance: Some(5), path: vec!["A".to_string(),"C".to_string()]});
-        start.push(Pair {node1: "A".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["A".to_string(),"B".to_string(), "D".to_string()]});
-        start.push(Pair {node1: "B".to_string(), node2: "C".to_string(), distance: Some(5), path: vec!["B".to_string(), "A".to_string(), "C".to_string()]});
-        start.push(Pair {node1: "B".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["B".to_string(),"D".to_string()]});
-        start.push(Pair {node1: "C".to_string(), node2: "D".to_string(), distance: Some(5), path: vec!["C".to_string(),"D".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "B".to_string(), distance: Some(5.0), path: vec!["A".to_string(),"B".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "C".to_string(), distance: Some(5.0), path: vec!["A".to_string(),"C".to_string()]});
+        start.push(Pair {node1: "A".to_string(), node2: "D".to_string(), distance: Some(5.0), path: vec!["A".to_string(),"B".to_string(), "D".to_string()]});
+        start.push(Pair {node1: "B".to_string(), node2: "C".to_string(), distance: Some(5.0), path: vec!["B".to_string(), "A".to_string(), "C".to_string()]});
+        start.push(Pair {node1: "B".to_string(), node2: "D".to_string(), distance: Some(5.0), path: vec!["B".to_string(),"D".to_string()]});
+        start.push(Pair {node1: "C".to_string(), node2: "D".to_string(), distance: Some(5.0), path: vec!["C".to_string(),"D".to_string()]});
     
        let results = get_optimized_pairs(&start);
        for result in results.iter() {
