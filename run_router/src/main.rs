@@ -60,69 +60,69 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     D,E,1
     D,F,1
     E,F,1";*/
-/*
+
     let csv = "node1,node2,weight
-    Willow Way/Creek,Timberline/Willow,1
-Timberline/Willow, Timberline/Poplar,1
-Timberline/Poplar, Timberline/Maple,1
-Timberline/Maple, Timberline/HickoryS,1
-Timberline/HickoryS, Timberline/HickoryN,1
-Timberline/HickoryS, Timberline/HickoryN,1
-Timberline/HickoryN,Timberline/Hemlock,1
-Timberline/Hemlock, Timberline/Magnolia,1
-Timberline/Magnolia, Timberline/Rancocas,1
-Timberline/Rancocas, Rancocas/Ash,1
-Rancocas/Ash, Rancocas/Evergreen,1
-Rancocas/Evergreen, Rancocas/Overhill,1
-Rancocas/Overhill, Rancocas/WoodLane,1
-Rancocas/WoodLane, Beach/Pine,1
-Beach/Pine, Rancocas/Pine,1
-Rancocas/Pine, Rancocas/WoodLane,1
-Rancocas/Pine, Rancocas/Oak,1
-Beach/Oak, Rancocas/Oak,1
-Rancocas/Oak, Rancocas/Lake,1
-Rancocas/Lake, Rancocas/Creek,1
-Rancocas/Creek, Creek/Woodman,1
-Creek/Woodman, Creek/Conestoga,1
-Creek/Woodman, Conestoga/Woodman,1
-Willow Way/Creek, Creek/Woodman,1
-Beach/Pine, Beach/Oak,1
-Beach/Oak, Rancocas/Lake,1
-Timberline/Willow, Larch/Holly,1
-Larch/Holly, Evergreen/Larch,1
-Evergreen/Larch, Larch/Linden,1
-Larch/Linden, Poplar/Larch,1
-Poplar/Larch, Timberline/Poplar,1
-Timberline/Maple, Hemlock/Maple,1
-Hemlock/Maple, Timberline/Hemlock,1
-Hemlock/Maple, Magnolia/Maple,1
-Magnolia/Maple, Timberline/Magnolia,1
-Timberline/Rancocas, Cedar/Maple,1
-Cedar/Maple, Maple/Walnut,1
-Maple/Walnut, Maple/Linden,1
-Maple/Linden, Larch/Maple,1
-Larch/Maple, Magnolia/Maple,1
-Creek/Conestoga, Holly/Conestoga,1
-Holly/Conestoga, Larch/Holly,1
-Conestoga/Woodman, Evergreen/Woodman,1
-Holly/Conestoga, Conestoga/Woodman,1
-Evergreen/Larch, Evergreen/Woodman,1
-Cedar/Maple, Ash/Cedar,1
-Overhill/Evergreen/Walnut, Overhill/UpperPark,1
-Overhill/UpperPark, WestWood/UpperPark,1
-Rancocas/Oak, LowerParkRoad,1
-Rancocas/Lake, LowerParkRoad,1
-Rancocas/WoodLane, WestWood/UpperPark,1
-Rancocas/Overhill, Overhill/UpperPark,1
-Linden/Larch, Maple/Linden,1
-Overhill/Evergreen/Walnut, Maple/Walnut,1
-Overhill/Evergreen/Walnut, Evergreen/Woodman,1
-Ash/Cedar, Evergreen/Cedar,1
-Evergreen/Cedar, Rancocas/Evergreen,1
-Rancocas/Ash, Ash/Cedar,1
-Poplar/Larch, Larch/Maple,1
-Overhill/Evergreen/Walnut, Evergreen/Cedar,1"; 
-*/
+    Willow Way/Creek,Timberline/Willow,0.064
+Timberline/Willow, Timberline/Poplar,0.262
+Timberline/Poplar, Timberline/Maple,0.06
+Timberline/Maple, Timberline/HickoryS,0.128
+Timberline/HickoryS, Timberline/HickoryN,0.22
+Timberline/HickoryS, Timberline/HickoryN,0.223
+Timberline/HickoryN,Timberline/Hemlock,0.093
+Timberline/Hemlock, Timberline/Magnolia,0.076
+Timberline/Magnolia, Timberline/Rancocas,0.11
+Timberline/Rancocas, Rancocas/Cedar,0.068
+Timberline/Rancocas, Rancocas/Ash,0.132
+Rancocas/Ash, Rancocas/Evergreen,0.116
+Rancocas/Evergreen, Rancocas/Overhill,0.067
+Rancocas/Overhill, Rancocas/WoodLane,0.059
+Rancocas/WoodLane, Beach/Pine,0.14
+Beach/Pine, Rancocas/Pine,0.097
+Rancocas/Pine, Rancocas/WoodLane,0.094
+Rancocas/Pine, Rancocas/Oak,0.059
+Beach/Oak, Rancocas/Oak,0.113
+Rancocas/Oak, Rancocas/Lake,0.06
+Rancocas/Lake, Rancocas/Creek,0.083
+Rancocas/Creek, Creek/Woolman,0.2
+Creek/Woolman, Creek/Conestoga,0.173
+Creek/Woolman, Holly/Conestoga,0.086
+Willow Way/Creek, Creek/Conestoga,0.18
+Beach/Pine, Beach/Oak,0.054
+Beach/Oak, Rancocas/Lake,0.182
+Timberline/Willow, Larch/Holly,0.062
+Larch/Holly, Evergreen/Larch,0.063
+Evergreen/Larch, Larch/Linden,0.061
+Larch/Linden, Poplar/Larch,0.132
+Poplar/Larch, Timberline/Poplar,0.689
+Timberline/Maple, Hemlock/Maple,0.081
+Hemlock/Maple, Timberline/Hemlock,0.27
+Hemlock/Maple, Magnolia/Maple,0.056
+Magnolia/Maple, Timberline/Magnolia,0.235
+Cedar/Maple, Maple/Walnut,0.0522
+Maple/Walnut, Maple/Linden,0.038
+Maple/Linden, Larch/Maple,0.047
+Larch/Maple, Magnolia/Maple,0.027
+Creek/Conestoga, Holly/Conestoga,0.088
+Holly/Conestoga, Larch/Holly,0.105
+Conestoga/Woolman, Evergreen/Woolman,0.144
+Holly/Conestoga, Conestoga/Woolman,0.012
+Evergreen/Larch, Evergreen/Woolman,0.069
+Cedar/Maple, Ash/Cedar,0.045
+Overhill/Evergreen/Walnut, Overhill/UpperPark,0.084
+Overhill/UpperPark, WestWood/UpperPark,0.062
+Rancocas/Oak, LowerParkRoad,0.09
+Rancocas/Lake, LowerParkRoad,0.09
+Rancocas/WoodLane, WestWood/UpperPark,0.062
+Rancocas/Overhill, Overhill/UpperPark,0.063
+Linden/Larch, Maple/Linden,0.207
+Overhill/Evergreen/Walnut, Maple/Walnut,0.189
+Overhill/Evergreen/Walnut, Evergreen/Woolman,0.065
+Ash/Cedar, Evergreen/Cedar,0.119
+Evergreen/Cedar, Rancocas/Evergreen,0.068
+Rancocas/Ash, Ash/Cedar,0.068
+Poplar/Larch, Larch/Maple,0.098
+Overhill/Evergreen/Walnut, Evergreen/Cedar,0.068"; 
+/*
     let csv = "node1,node2,weight
     0,1,4
     0,7,8
@@ -137,7 +137,7 @@ Overhill/Evergreen/Walnut, Evergreen/Cedar,1";
     5,6,2
     6,8,6
     6,7,1
-    7,8,7";
+    7,8,7";*/
 
     let mut reader = csv::Reader::from_reader(csv.as_bytes());
     let mut vec: Vec<Record> = Vec::new();
