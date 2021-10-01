@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns 
+        http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d0" for="node" attr.name="color" attr.type="string">
+    <default>yellow</default>
+  </key>
+  <key id="d1" for="edge" attr.name="weight" attr.type="double"/>
+  <graph id="G" edgedefault="undirected">
+<node id="Willow Way/Creek"/>
+<node id="Timberline/Willow"/>
+<node id="Timberline/Poplar"/>
+<node id="Timberline/Maple"/>
+<node id="Timberline/HickoryS"/>
+<node id="Timberline/HickoryN"/>
+<node id="Timberline/Hemlock"/>
+<node id="Timberline/Magnolia"/>
+<node id="Timberline/Rancocas"/>
+<node id="Rancocas/Cedar"/>
+<node id="Rancocas/Ash"/>
+<node id="Rancocas/Evergreen"/>
+<node id="Rancocas/Overhill"/>
+<node id="Rancocas/WoodLane"/>
+<node id="Beach/Pine"/>
+<node id="Rancocas/Pine"/>
+<node id="Rancocas/Oak"/>
+<node id="Beach/Oak"/>
+<node id="Rancocas/Lake"/>
+<node id="Rancocas/Creek"/>
+<node id="Creek/Woolman"/>
+<node id="Creek/Conestoga"/>
+<node id="Holly/Conestoga"/>
+<node id="Larch/Holly"/>
+<node id="Evergreen/Larch"/>
+<node id="Larch/Linden"/>
+<node id="Poplar/Larch"/>
+<node id="Hemlock/Maple"/>
+<node id="Magnolia/Maple"/>
+<node id="Cedar/Maple"/>
+<node id="Maple/Walnut"/>
+<node id="Maple/Linden"/>
+<node id="Larch/Maple"/>
+<node id="Conestoga/Woolman"/>
+<node id="Evergreen/Woolman"/>
+<node id="Ash/Cedar"/>
+<node id="Overhill/Evergreen/Walnut"/>
+<node id="Overhill/UpperPark"/>
+<node id="WestWood/UpperPark"/>
+<node id="LowerParkRoad"/>
+<node id="Linden/Larch"/>
+<node id="Evergreen/Cedar"/>
+<edge id="Willow Way/Creek-Timberline/Willow" source="Willow Way/Creek" target="Timberline/Willow">
+        <data key="d1">0.064</data>
+      </edge>
+<edge id="Timberline/Willow-Timberline/Poplar" source="Timberline/Willow" target="Timberline/Poplar">
+        <data key="d1">0.262</data>
+      </edge>
+<edge id="Timberline/Poplar-Timberline/Maple" source="Timberline/Poplar" target="Timberline/Maple">
+        <data key="d1">0.06</data>
+      </edge>
+<edge id="Timberline/Maple-Timberline/HickoryS" source="Timberline/Maple" target="Timberline/HickoryS">
+        <data key="d1">0.128</data>
+      </edge>
+<edge id="Timberline/HickoryS-Timberline/HickoryN" source="Timberline/HickoryS" target="Timberline/HickoryN">
+        <data key="d1">0.22</data>
+      </edge>
+<edge id="Timberline/HickoryS-Timberline/HickoryN" source="Timberline/HickoryS" target="Timberline/HickoryN">
+        <data key="d1">0.223</data>
+      </edge>
+<edge id="Timberline/HickoryN-Timberline/Hemlock" source="Timberline/HickoryN" target="Timberline/Hemlock">
+        <data key="d1">0.093</data>
+      </edge>
+<edge id="Timberline/Hemlock-Timberline/Magnolia" source="Timberline/Hemlock" target="Timberline/Magnolia">
+        <data key="d1">0.076</data>
+      </edge>
+<edge id="Timberline/Magnolia-Timberline/Rancocas" source="Timberline/Magnolia" target="Timberline/Rancocas">
+        <data key="d1">0.11</data>
+      </edge>
+<edge id="Timberline/Rancocas-Rancocas/Cedar" source="Timberline/Rancocas" target="Rancocas/Cedar">
+        <data key="d1">0.068</data>
+      </edge>
+<edge id="Timberline/Rancocas-Rancocas/Ash" source="Timberline/Rancocas" target="Rancocas/Ash">
+        <data key="d1">0.132</data>
+      </edge>
+<edge id="Rancocas/Ash-Rancocas/Evergreen" source="Rancocas/Ash" target="Rancocas/Evergreen">
+        <data key="d1">0.116</data>
+      </edge>
+<edge id="Rancocas/Evergreen-Rancocas/Overhill" source="Rancocas/Evergreen" target="Rancocas/Overhill">
+        <data key="d1">0.067</data>
+      </edge>
+<edge id="Rancocas/Overhill-Rancocas/WoodLane" source="Rancocas/Overhill" target="Rancocas/WoodLane">
+        <data key="d1">0.059</data>
+      </edge>
+<edge id="Rancocas/WoodLane-Beach/Pine" source="Rancocas/WoodLane" target="Beach/Pine">
+        <data key="d1">0.14</data>
+      </edge>
+<edge id="Beach/Pine-Rancocas/Pine" source="Beach/Pine" target="Rancocas/Pine">
+        <data key="d1">0.097</data>
+      </edge>
+<edge id="Rancocas/Pine-Rancocas/WoodLane" source="Rancocas/Pine" target="Rancocas/WoodLane">
+        <data key="d1">0.094</data>
+      </edge>
+<edge id="Rancocas/Pine-Rancocas/Oak" source="Rancocas/Pine" target="Rancocas/Oak">
+        <data key="d1">0.059</data>
+      </edge>
+<edge id="Beach/Oak-Rancocas/Oak" source="Beach/Oak" target="Rancocas/Oak">
+        <data key="d1">0.113</data>
+      </edge>
+<edge id="Rancocas/Oak-Rancocas/Lake" source="Rancocas/Oak" target="Rancocas/Lake">
+        <data key="d1">0.06</data>
+      </edge>
+<edge id="Rancocas/Lake-Rancocas/Creek" source="Rancocas/Lake" target="Rancocas/Creek">
+        <data key="d1">0.083</data>
+      </edge>
+<edge id="Rancocas/Creek-Creek/Woolman" source="Rancocas/Creek" target="Creek/Woolman">
+        <data key="d1">0.2</data>
+      </edge>
+<edge id="Creek/Woolman-Creek/Conestoga" source="Creek/Woolman" target="Creek/Conestoga">
+        <data key="d1">0.173</data>
+      </edge>
+<edge id="Creek/Woolman-Holly/Conestoga" source="Creek/Woolman" target="Holly/Conestoga">
+        <data key="d1">0.086</data>
+      </edge>
+<edge id="Willow Way/Creek-Creek/Conestoga" source="Willow Way/Creek" target="Creek/Conestoga">
+        <data key="d1">0.18</data>
+      </edge>
+<edge id="Beach/Pine-Beach/Oak" source="Beach/Pine" target="Beach/Oak">
+        <data key="d1">0.054</data>
+      </edge>
+<edge id="Beach/Oak-Rancocas/Lake" source="Beach/Oak" target="Rancocas/Lake">
+        <data key="d1">0.182</data>
+      </edge>
+<edge id="Timberline/Willow-Larch/Holly" source="Timberline/Willow" target="Larch/Holly">
+        <data key="d1">0.062</data>
+      </edge>
+<edge id="Larch/Holly-Evergreen/Larch" source="Larch/Holly" target="Evergreen/Larch">
+        <data key="d1">0.063</data>
+      </edge>
+<edge id="Evergreen/Larch-Larch/Linden" source="Evergreen/Larch" target="Larch/Linden">
+        <data key="d1">0.061</data>
+      </edge>
+<edge id="Larch/Linden-Poplar/Larch" source="Larch/Linden" target="Poplar/Larch">
+        <data key="d1">0.132</data>
+      </edge>
+<edge id="Poplar/Larch-Timberline/Poplar" source="Poplar/Larch" target="Timberline/Poplar">
+        <data key="d1">0.689</data>
+      </edge>
+<edge id="Timberline/Maple-Hemlock/Maple" source="Timberline/Maple" target="Hemlock/Maple">
+        <data key="d1">0.081</data>
+      </edge>
+<edge id="Hemlock/Maple-Timberline/Hemlock" source="Hemlock/Maple" target="Timberline/Hemlock">
+        <data key="d1">0.27</data>
+      </edge>
+<edge id="Hemlock/Maple-Magnolia/Maple" source="Hemlock/Maple" target="Magnolia/Maple">
+        <data key="d1">0.056</data>
+      </edge>
+<edge id="Magnolia/Maple-Timberline/Magnolia" source="Magnolia/Maple" target="Timberline/Magnolia">
+        <data key="d1">0.235</data>
+      </edge>
+<edge id="Cedar/Maple-Maple/Walnut" source="Cedar/Maple" target="Maple/Walnut">
+        <data key="d1">0.0522</data>
+      </edge>
+<edge id="Maple/Walnut-Maple/Linden" source="Maple/Walnut" target="Maple/Linden">
+        <data key="d1">0.038</data>
+      </edge>
+<edge id="Maple/Linden-Larch/Maple" source="Maple/Linden" target="Larch/Maple">
+        <data key="d1">0.047</data>
+      </edge>
+<edge id="Larch/Maple-Magnolia/Maple" source="Larch/Maple" target="Magnolia/Maple">
+        <data key="d1">0.027</data>
+      </edge>
+<edge id="Creek/Conestoga-Holly/Conestoga" source="Creek/Conestoga" target="Holly/Conestoga">
+        <data key="d1">0.088</data>
+      </edge>
+<edge id="Holly/Conestoga-Larch/Holly" source="Holly/Conestoga" target="Larch/Holly">
+        <data key="d1">0.105</data>
+      </edge>
+<edge id="Conestoga/Woolman-Evergreen/Woolman" source="Conestoga/Woolman" target="Evergreen/Woolman">
+        <data key="d1">0.144</data>
+      </edge>
+<edge id="Holly/Conestoga-Conestoga/Woolman" source="Holly/Conestoga" target="Conestoga/Woolman">
+        <data key="d1">0.012</data>
+      </edge>
+<edge id="Evergreen/Larch-Evergreen/Woolman" source="Evergreen/Larch" target="Evergreen/Woolman">
+        <data key="d1">0.069</data>
+      </edge>
+<edge id="Cedar/Maple-Ash/Cedar" source="Cedar/Maple" target="Ash/Cedar">
+        <data key="d1">0.045</data>
+      </edge>
+<edge id="Overhill/Evergreen/Walnut-Overhill/UpperPark" source="Overhill/Evergreen/Walnut" target="Overhill/UpperPark">
+        <data key="d1">0.084</data>
+      </edge>
+<edge id="Overhill/UpperPark-WestWood/UpperPark" source="Overhill/UpperPark" target="WestWood/UpperPark">
+        <data key="d1">0.062</data>
+      </edge>
+<edge id="Rancocas/Oak-LowerParkRoad" source="Rancocas/Oak" target="LowerParkRoad">
+        <data key="d1">0.09</data>
+      </edge>
+<edge id="Rancocas/Lake-LowerParkRoad" source="Rancocas/Lake" target="LowerParkRoad">
+        <data key="d1">0.09</data>
+      </edge>
+<edge id="Rancocas/WoodLane-WestWood/UpperPark" source="Rancocas/WoodLane" target="WestWood/UpperPark">
+        <data key="d1">0.062</data>
+      </edge>
+<edge id="Rancocas/Overhill-Overhill/UpperPark" source="Rancocas/Overhill" target="Overhill/UpperPark">
+        <data key="d1">0.063</data>
+      </edge>
+<edge id="Linden/Larch-Maple/Linden" source="Linden/Larch" target="Maple/Linden">
+        <data key="d1">0.207</data>
+      </edge>
+<edge id="Overhill/Evergreen/Walnut-Maple/Walnut" source="Overhill/Evergreen/Walnut" target="Maple/Walnut">
+        <data key="d1">0.189</data>
+      </edge>
+<edge id="Overhill/Evergreen/Walnut-Evergreen/Woolman" source="Overhill/Evergreen/Walnut" target="Evergreen/Woolman">
+        <data key="d1">0.065</data>
+      </edge>
+<edge id="Ash/Cedar-Evergreen/Cedar" source="Ash/Cedar" target="Evergreen/Cedar">
+        <data key="d1">0.119</data>
+      </edge>
+<edge id="Evergreen/Cedar-Rancocas/Evergreen" source="Evergreen/Cedar" target="Rancocas/Evergreen">
+        <data key="d1">0.068</data>
+      </edge>
+<edge id="Rancocas/Ash-Ash/Cedar" source="Rancocas/Ash" target="Ash/Cedar">
+        <data key="d1">0.068</data>
+      </edge>
+<edge id="Poplar/Larch-Larch/Maple" source="Poplar/Larch" target="Larch/Maple">
+        <data key="d1">0.098</data>
+      </edge>
+<edge id="Overhill/Evergreen/Walnut-Evergreen/Cedar" source="Overhill/Evergreen/Walnut" target="Evergreen/Cedar">
+        <data key="d1">0.068</data>
+      </edge>
+  </graph>
+</graphml>

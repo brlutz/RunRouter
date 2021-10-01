@@ -152,7 +152,7 @@ Overhill/Evergreen/Walnut, Evergreen/Cedar,0.068";
 
 fn main() -> Result<(), csv::Error> {
     let vec: Vec<Record> = get_data().unwrap();
-
+    print_graphml(&vec);
     for record in &vec {
         println!(
             "Nodes: {},{}: Weight: {}.",
@@ -207,28 +207,28 @@ fn main() -> Result<(), csv::Error> {
         for (key, dn) in maps_for_odd_nodes.iter() {
             // println!("Map for odd node: {}", key);
             for (k, dnode) in dn.nodes.iter() {
-               /*println!(
+               println!(
                     "Traveling to node {} (out of {} nodes)",
                     k,
                     dn.nodes
-                        .keys()
-                        .map(|x| x.to_string())
+                        .keys().len()
+                        /*.map(|x| x.to_string())
                         .collect::<Vec<_>>()
-                        .join(",")
-                );*/
+                        .join(",")*/
+                );
                 let path: String = dnode
                     .path
                     .iter()
                     .map(|x| x.to_string())
                     .collect::<Vec<_>>()
                     .join(",");
-               /* println!(
+              println!(
                     "{} -> {}, Path: {}, Total Distance: {}",
                     key,
                     dnode.name,
                     path,
                     dn.nodes.get(&dnode.name).unwrap().total_distance
-                );*/
+                );
             }
         }
         // find all the possible pairs
@@ -1257,6 +1257,50 @@ fn connect_djikstra_nodes(
     }
 
     return graph;
+}
+
+fn print_graphml(records: &Vec<Record>) {
+
+    let mut nodes: Vec<String> = Vec::new();
+
+    for record in records.iter() {
+        let mut insert_node1: bool = true;
+        let mut insert_node2: bool = true;
+        if nodes.iter().any(|i| i.eq(&record.node1.trim())) {
+            insert_node1 = false;
+        }
+
+        if nodes.iter().any(|i| i.eq(&record.node2.trim())) {
+            insert_node2 = false;
+        }
+
+        if insert_node1 {
+            nodes.push(record.node1.clone().trim().to_string());
+            //println!("{}", record.node1.clone());
+        }
+        if insert_node2 {
+            nodes.push(record.node2.clone().trim().to_string());
+            //println!("{}", record.node2.clone());
+        }
+    }
+
+    for node in nodes.iter() {
+       // println!("<node id=\"{}\"/>", node.trim());
+       println!("{}", node.trim());
+    }
+
+    for record in records.iter() {
+        let mut owned_string: String = record.node1.trim().to_owned();
+        let another_owned_string: String = record.node2.trim().to_owned();
+        
+        owned_string.push_str("-");
+        owned_string.push_str(&another_owned_string);
+        /*println!("<edge id=\"{}\" source=\"{}\" target=\"{}\">
+        <data key=\"d1\">{}</data>
+      </edge>", owned_string, record.node1.trim(), record.node2.trim(), record.weight);*/
+      println!("{} {} {}", record.node1.trim(), record.node2.trim(), record.weight);
+    }
+    panic!("done printing graphml");
 }
 
 #[cfg(test)]

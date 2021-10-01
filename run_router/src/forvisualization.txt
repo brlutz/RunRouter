@@ -1,0 +1,102 @@
+WillowWay/Creek
+Timberline/Willow
+Timberline/Poplar
+Timberline/Maple
+Timberline/HickoryS
+Timberline/HickoryN
+Timberline/Hemlock
+Timberline/Magnolia
+Timberline/Rancocas
+Rancocas/Cedar
+Rancocas/Ash
+Rancocas/Evergreen
+Rancocas/Overhill
+Rancocas/WoodLane
+Beach/Pine
+Rancocas/Pine
+Rancocas/Oak
+Beach/Oak
+Rancocas/Lake
+Rancocas/Creek
+Creek/Woolman
+Creek/Conestoga
+Holly/Conestoga
+Larch/Holly
+Evergreen/Larch
+Larch/Linden
+Poplar/Larch
+Hemlock/Maple
+Magnolia/Maple
+Cedar/Maple
+Maple/Walnut
+Maple/Linden
+Larch/Maple
+Conestoga/Woolman
+Evergreen/Woolman
+Ash/Cedar
+Overhill/Evergreen/Walnut
+Overhill/UpperPark
+WestWood/UpperPark
+LowerParkRoad
+Linden/Larch
+Evergreen/Cedar
+WillowWay/Creek Timberline/Willow 0.064
+Timberline/Willow Timberline/Poplar 0.262
+Timberline/Poplar Timberline/Maple 0.06
+Timberline/Maple Timberline/HickoryS 0.128
+Timberline/HickoryS Timberline/HickoryN 0.22
+Timberline/HickoryS Timberline/HickoryN 0.223
+Timberline/HickoryN Timberline/Hemlock 0.093
+Timberline/Hemlock Timberline/Magnolia 0.076
+Timberline/Magnolia Timberline/Rancocas 0.11
+Timberline/Rancocas Rancocas/Cedar 0.068
+Timberline/Rancocas Rancocas/Ash 0.132
+Rancocas/Ash Rancocas/Evergreen 0.116
+Rancocas/Evergreen Rancocas/Overhill 0.067
+Rancocas/Overhill Rancocas/WoodLane 0.059
+Rancocas/WoodLane Beach/Pine 0.14
+Beach/Pine Rancocas/Pine 0.097
+Rancocas/Pine Rancocas/WoodLane 0.094
+Rancocas/Pine Rancocas/Oak 0.059
+Beach/Oak Rancocas/Oak 0.113
+Rancocas/Oak Rancocas/Lake 0.06
+Rancocas/Lake Rancocas/Creek 0.083
+Rancocas/Creek Creek/Woolman 0.2
+Creek/Woolman Creek/Conestoga 0.173
+Creek/Woolman Holly/Conestoga 0.086
+WillowWay/Creek Creek/Conestoga 0.18
+Beach/Pine Beach/Oak 0.054
+Beach/Oak Rancocas/Lake 0.182
+Timberline/Willow Larch/Holly 0.062
+Larch/Holly Evergreen/Larch 0.063
+Evergreen/Larch Larch/Linden 0.061
+Larch/Linden Poplar/Larch 0.132
+Poplar/Larch Timberline/Poplar 0.689
+Timberline/Maple Hemlock/Maple 0.081
+Hemlock/Maple Timberline/Hemlock 0.27
+Hemlock/Maple Magnolia/Maple 0.056
+Magnolia/Maple Timberline/Magnolia 0.235
+Cedar/Maple Maple/Walnut 0.0522
+Maple/Walnut Maple/Linden 0.038
+Maple/Linden Larch/Maple 0.047
+Larch/Maple Magnolia/Maple 0.027
+Creek/Conestoga Holly/Conestoga 0.088
+Holly/Conestoga Larch/Holly 0.105
+Conestoga/Woolman Evergreen/Woolman 0.144
+Holly/Conestoga Conestoga/Woolman 0.012
+Evergreen/Larch Evergreen/Woolman 0.069
+Cedar/Maple Ash/Cedar 0.045
+Overhill/Evergreen/Walnut Overhill/UpperPark 0.084
+Overhill/UpperPark WestWood/UpperPark 0.062
+Rancocas/Oak LowerParkRoad 0.09
+Rancocas/Lake LowerParkRoad 0.09
+Rancocas/WoodLane WestWood/UpperPark 0.062
+Rancocas/Overhill Overhill/UpperPark 0.063
+Linden/Larch Maple/Linden 0.207
+Overhill/Evergreen/Walnut Maple/Walnut 0.189
+Overhill/Evergreen/Walnut Evergreen/Woolman 0.065
+Ash/Cedar Evergreen/Cedar 0.119
+Evergreen/Cedar Rancocas/Evergreen 0.068
+Rancocas/Ash Ash/Cedar 0.068
+Poplar/Larch Larch/Maple 0.098
+Overhill/Evergreen/Walnut Evergreen/Cedar 0.068
