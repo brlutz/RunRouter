@@ -62,17 +62,18 @@ fn get_data() -> Result<Vec<Record>, csv::Error> {
     E,F,1";*/
 
     let csv = "node1,node2,weight
-    Willow Way/Creek,Timberline/Willow,0.064
+WillowWay/Creek, Timberline/Willow,0.064
 Timberline/Willow, Timberline/Poplar,0.262
 Timberline/Poplar, Timberline/Maple,0.06
 Timberline/Maple, Timberline/HickoryS,0.128
 Timberline/HickoryS, Timberline/HickoryN,0.22
 Timberline/HickoryS, Timberline/HickoryN,0.223
-Timberline/HickoryN,Timberline/Hemlock,0.093
+Timberline/HickoryN, Timberline/Hemlock,0.093
 Timberline/Hemlock, Timberline/Magnolia,0.076
 Timberline/Magnolia, Timberline/Rancocas,0.11
 Timberline/Rancocas, Rancocas/Cedar,0.068
-Timberline/Rancocas, Rancocas/Ash,0.132
+Rancocas/Cedar, Rancocas/Ash,0.132
+Cedar/Maple, Timberline/Rancocas,0.150
 Rancocas/Ash, Rancocas/Evergreen,0.116
 Rancocas/Evergreen, Rancocas/Overhill,0.067
 Rancocas/Overhill, Rancocas/WoodLane,0.059
@@ -86,14 +87,14 @@ Rancocas/Lake, Rancocas/Creek,0.083
 Rancocas/Creek, Creek/Woolman,0.2
 Creek/Woolman, Creek/Conestoga,0.173
 Creek/Woolman, Holly/Conestoga,0.086
-Willow Way/Creek, Creek/Conestoga,0.18
+WillowWay/Creek, Creek/Conestoga,0.18
 Beach/Pine, Beach/Oak,0.054
 Beach/Oak, Rancocas/Lake,0.182
 Timberline/Willow, Larch/Holly,0.062
 Larch/Holly, Evergreen/Larch,0.063
 Evergreen/Larch, Larch/Linden,0.061
 Larch/Linden, Poplar/Larch,0.132
-Poplar/Larch, Timberline/Poplar,0.689
+Poplar/Larch, Timberline/Poplar,0.069
 Timberline/Maple, Hemlock/Maple,0.081
 Hemlock/Maple, Timberline/Hemlock,0.27
 Hemlock/Maple, Magnolia/Maple,0.056
@@ -114,7 +115,7 @@ Rancocas/Oak, LowerParkRoad,0.09
 Rancocas/Lake, LowerParkRoad,0.09
 Rancocas/WoodLane, WestWood/UpperPark,0.062
 Rancocas/Overhill, Overhill/UpperPark,0.063
-Linden/Larch, Maple/Linden,0.207
+Larch/Linden, Maple/Linden,0.207
 Overhill/Evergreen/Walnut, Maple/Walnut,0.189
 Overhill/Evergreen/Walnut, Evergreen/Woolman,0.065
 Ash/Cedar, Evergreen/Cedar,0.119
@@ -143,7 +144,7 @@ Overhill/Evergreen/Walnut, Evergreen/Cedar,0.068";
     let mut vec: Vec<Record> = Vec::new();
     for record in reader.deserialize() {
         let record: Record = record?;
-        //println!("{}, {}, {}", record.node1, record.node2, record.weight);
+        println!("{}, {}, {}", record.node1, record.node2, record.weight);
         vec.push(record);
     }
 
@@ -152,7 +153,7 @@ Overhill/Evergreen/Walnut, Evergreen/Cedar,0.068";
 
 fn main() -> Result<(), csv::Error> {
     let vec: Vec<Record> = get_data().unwrap();
-    print_graphml(&vec);
+    // print_graphml(&vec);
     for record in &vec {
         println!(
             "Nodes: {},{}: Weight: {}.",
@@ -193,7 +194,9 @@ fn main() -> Result<(), csv::Error> {
     if !is_eulered {
         // find maps for all the odd nodes
         let mut maps_for_odd_nodes: HashMap<String, DjikstraNodes> = HashMap::new();
+        let mut count = 0;
         for odd_node in odd_nodes.iter() {
+            println!("Prepping node {}", odd_node);
             let mut graph: DjikstraNodes = DjikstraNodes {
                 start_node: odd_node.clone(),
                 nodes: d.nodes.clone(),
@@ -202,6 +205,8 @@ fn main() -> Result<(), csv::Error> {
             find_shortest_path(&graph.start_node.clone(), &mut graph);
             find_median_distance(&graph.start_node.clone(), &mut graph);
             maps_for_odd_nodes.insert(graph.start_node.clone(), graph);
+            count = count + 1;
+            if count == 2 {panic!("We're taking a break here")}
         }
 
         for (key, dn) in maps_for_odd_nodes.iter() {
@@ -754,7 +759,7 @@ fn get_pair_combinations(
                             );
                         }
                         count = count + 1;
-                        println!("Pair has td: {}, compared to tmd: {}, with distance: {}",  map.get(&pair.node1).unwrap().nodes.get(&pair.node2).unwrap().total_distance as f32, map.get(&pair.node1).unwrap().median_total_distance as f32, distance_threshold );
+                        println!("Pair has td: {}, compared to tmd: {}, with factor: {}",  map.get(&pair.node1).unwrap().nodes.get(&pair.node2).unwrap().total_distance as f32, map.get(&pair.node1).unwrap().median_total_distance as f32, distance_threshold );
                         if map.get(&pair.node1).unwrap().nodes.get(&pair.node2).unwrap().total_distance as f32 > map.get(&pair.node1).unwrap().median_total_distance as f32 * distance_threshold {
                             return None
                         }

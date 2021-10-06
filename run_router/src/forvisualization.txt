@@ -38,7 +38,6 @@ Overhill/Evergreen/Walnut
 Overhill/UpperPark
 WestWood/UpperPark
 LowerParkRoad
-Linden/Larch
 Evergreen/Cedar
 WillowWay/Creek Timberline/Willow 0.064
 Timberline/Willow Timberline/Poplar 0.262
@@ -50,7 +49,8 @@ Timberline/HickoryN Timberline/Hemlock 0.093
 Timberline/Hemlock Timberline/Magnolia 0.076
 Timberline/Magnolia Timberline/Rancocas 0.11
 Timberline/Rancocas Rancocas/Cedar 0.068
-Timberline/Rancocas Rancocas/Ash 0.132
+Rancocas/Cedar Rancocas/Ash 0.132
+Cedar/Maple Timberline/Rancocas 0.150
 Rancocas/Ash Rancocas/Evergreen 0.116
 Rancocas/Evergreen Rancocas/Overhill 0.067
 Rancocas/Overhill Rancocas/WoodLane 0.059
@@ -71,7 +71,7 @@ Timberline/Willow Larch/Holly 0.062
 Larch/Holly Evergreen/Larch 0.063
 Evergreen/Larch Larch/Linden 0.061
 Larch/Linden Poplar/Larch 0.132
-Poplar/Larch Timberline/Poplar 0.689
+Poplar/Larch Timberline/Poplar 0.069
 Timberline/Maple Hemlock/Maple 0.081
 Hemlock/Maple Timberline/Hemlock 0.27
 Hemlock/Maple Magnolia/Maple 0.056
@@ -92,7 +92,7 @@ Rancocas/Oak LowerParkRoad 0.09
 Rancocas/Lake LowerParkRoad 0.09
 Rancocas/WoodLane WestWood/UpperPark 0.062
 Rancocas/Overhill Overhill/UpperPark 0.063
-Linden/Larch Maple/Linden 0.207
+Larch/Linden Maple/Linden 0.207
 Overhill/Evergreen/Walnut Maple/Walnut 0.189
 Overhill/Evergreen/Walnut Evergreen/Woolman 0.065
 Ash/Cedar Evergreen/Cedar 0.119
